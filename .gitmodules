@@ -1,6 +1,3 @@
 [submodule "2.office/src/wemos.setup"]
 	path = 2.office/src/wemos.setup
 	url = git@github.com:marcelo-lara/wemos.setup.git
-[submodule "2.office/src/BME280"]
-	path = 2.office/src/BME280
-	url = git@github.com:marcelo-lara/BME280.git

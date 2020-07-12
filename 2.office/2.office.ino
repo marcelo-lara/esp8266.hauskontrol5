@@ -20,8 +20,12 @@ Button wallSwitch(wallSwitchPin);
 #include "src/Core/Devices/Light/Light.h"
 Light light(relayOutPin);
 
+#include "src/Core/Devices/Environment/Environment.h"
+Environment environment;
+
 
 void setup() {
+  //core devices
   wallSwitch.setup();
   wallSwitch.swCallback=handleSwitch;
   light.turnOn();
@@ -32,8 +36,10 @@ void setup() {
 
   // Start the server
   server.begin();
-  Serial.println("Server started");
  
+  //non-critical hardware
+  environment.setup();
+
   // Print the IP address
   Serial.print("Use this URL to connect: ");
   Serial.print("http://");
@@ -44,6 +50,8 @@ void setup() {
  
 void loop() {
   wallSwitch.update();
+  environment.update();
+  
 
   // Check if a client has connected
   WiFiClient client = server.available();
