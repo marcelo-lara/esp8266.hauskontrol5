@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include "src/wemos.setup/wemos.setup.h"
+#include "wemos.setup.h"
 
 /////////////////////////////////////////
 // Hardware Setup
@@ -18,16 +18,19 @@ WiFiServer server(80);
 Button wallSwitch(wallSwitchPin);
 
 #include "src/Core/Devices/Light/Light.h"
-Light light(relayOutPin);
+Light light(relayOutPin, true);
 
 #include "src/Core/Devices/Environment/Environment.h"
 Environment environment;
 
 
 void setup() {
+  pinMode(statusLedPin, OUTPUT);
+  digitalWrite(statusLedPin, LOW);
+
   //core devices
   wallSwitch.setup();
-  wallSwitch.swCallback=handleSwitch;
+  wallSwitch.swCallback=[](int cc) {light.toggle();};
   light.turnOn();
 
   //connect
@@ -39,6 +42,7 @@ void setup() {
  
   //non-critical hardware
   environment.setup();
+  digitalWrite(statusLedPin, HIGH);
 
   // Print the IP address
   Serial.print("Use this URL to connect: ");
@@ -49,21 +53,23 @@ void setup() {
 }
  
 void loop() {
+  wemosWiFi.update();
+
   wallSwitch.update();
   environment.update();
-  
+  handleConnection();
 
+ 
+}
+
+void handleConnection(){
   // Check if a client has connected
   WiFiClient client = server.available();
-  if (!client) {
-    return;
-  }
+  if (!client) return;
  
   // Wait until the client sends some data
   Serial.println("new client");
-  while(!client.available()){
-    delay(1);
-  }
+  while(!client.available()){delay(1);}
  
   // Read the first line of the request
   String request = client.readStringUntil('\r');
@@ -71,26 +77,19 @@ void loop() {
   client.flush();
  
   // Match the request
-  int value = LOW;
   if (request.indexOf("/STATUS") != -1)  {
     client.println("HTTP/1.1 200 OK");
     client.println("Content-Type: application/json");
     client.println(""); //  do not forget this one
-    client.print("{\"statusPattern\": \"true\"}");
+    client.print("{\"statusPattern\": \"");
+    client.print(light.isOn?"true":"false");
+    client.println("\"}");
     return;
   }
 
-  if (request.indexOf("/LED=ON") != -1)  {
-    digitalWrite(relayOutPin, LOW);
-    value = HIGH;
-  }
-  if (request.indexOf("/LED=OFF") != -1)  {
-    digitalWrite(relayOutPin, HIGH);
-    value = LOW;
-  }
+  if (request.indexOf("/LED=ON") != -1)  light.turnOn();
+  if (request.indexOf("/LED=OFF") != -1)  light.turnOff();
  
-// Set ledPin according to the request
-//digitalWrite(ledPin, value);
  
   // Return the response
   client.println("HTTP/1.1 200 OK");
@@ -99,20 +98,30 @@ void loop() {
   client.println("<!DOCTYPE HTML>");
   client.println("<html>");
  
-  client.print("Led pin is now: ");
-  client.print(value == HIGH?"On":"Off");
-
+  client.print("ligth: ");
+  client.print(light.isOn?"On":"Off");
   client.println("<br><br>");
   client.println("<a href=\"/LED=ON\"\"><button>Turn On </button></a>");
   client.println("<a href=\"/LED=OFF\"\"><button>Turn Off </button></a><br />");  
+
+//environment
+  client.println("<br/><br/>");
+  client.print("temperature:");
+  client.print(environment.temperature);
+  client.println("<br/>");
+  client.print("humidity:");
+  client.print(environment.humidity);
+  client.println("<br/>");
+  client.print("pressure:");
+  client.print(environment.pressure);
+  client.println("<br/>");
+  
+  
+
   client.println("</html>");
  
   delay(1);
   Serial.println("Client disonnected");
   Serial.println("");
- 
-}
 
-void handleSwitch(int clickCount){
-  light.toggle();
-}
+};
