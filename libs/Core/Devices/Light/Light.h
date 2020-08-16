@@ -13,7 +13,7 @@ public:
     bool isOn;
 private:
     int pin;
-    bool outOn;
+    bool OnIsLow;
     void setOutput(bool newStatus);
 
 };

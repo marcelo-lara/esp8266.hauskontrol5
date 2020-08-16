@@ -7,7 +7,7 @@ Light::Light(int _pin){
 Light::Light(int _pin, bool invertOnStatus){
     pin=_pin;
     pinMode(pin, OUTPUT);
-    outOn=!invertOnStatus;
+    OnIsLow=invertOnStatus;
 };
 
 
@@ -22,5 +22,5 @@ void Light::toggle(){
 };
 void Light::setOutput(bool newStatus){
     isOn=newStatus;
-    digitalWrite(pin, isOn? HIGH : LOW);
+    digitalWrite(pin, OnIsLow ? (isOn? LOW: HIGH) : (isOn? HIGH: LOW ));
 };
