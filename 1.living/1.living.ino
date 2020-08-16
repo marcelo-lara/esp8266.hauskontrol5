@@ -4,13 +4,13 @@
 
 /////////////////////////////////////////
 // Hardware Setup
-#define wallSwitchPin  14 // D5 Wall Switch
-#define statusLedPin   12 // D6 Wall StatusLed
-#define relayOutPin    13 // D7 relay out
-#define irSendPin       0 // D3 infrared signal out
-#define bme280_scl      5 // D1 SCL (bme280)
-#define bme280_sda      4 // D2 SDA (bme280)
 #define wifiLedPin      2 // D4 builtIn led
+#define wallSwitchPin   5 // D1 Wall Switch
+#define statusLedPin    2 // D4 Wall StatusLed
+#define out1            4 // D2
+#define out2           14 // D5
+#define out3           12 // D6
+#define out4           13 // D7
 
 WiFiServer server(80);
 
@@ -18,11 +18,10 @@ WiFiServer server(80);
 Button wallSwitch(wallSwitchPin);
 
 #include "src/Core/Devices/Light/Light.h"
-Light light(relayOutPin, true);
-
-#include "src/Core/Devices/Environment/Environment.h"
-Environment environment;
-
+Light light1(out1, false); // main
+Light light2(out2, false); // dicro
+Light light3(out3, false); // bookshelf
+Light light4(out4, false); // corner
 
 void setup() {
   pinMode(statusLedPin, OUTPUT);
@@ -30,19 +29,18 @@ void setup() {
 
   //core devices
   wallSwitch.setup();
-  wallSwitch.swCallback=[](int cc) {light.toggle();};
-  light.turnOn();
+  wallSwitch.swCallback=switchCallback;
+  light1.turnOn();
 
   //connect
-  wemosWiFi.connect("office");
-  light.turnOff();
+  wemosWiFi.connect("living");
+  light1.turnOff();
 
   // Start the server
   server.begin();
  
   //non-critical hardware
-  environment.setup();
-  digitalWrite(statusLedPin, HIGH);
+  analogWrite(statusLedPin, 50);
 
   // Print the IP address
   Serial.print("Use this URL to connect: ");
@@ -56,7 +54,6 @@ void loop() {
   wemosWiFi.update();
 
   wallSwitch.update();
-  environment.update();
   handleConnection();
 
  
@@ -77,18 +74,41 @@ void handleConnection(){
   client.flush();
  
   // Match the request
-  if (request.indexOf("/STATUS") != -1)  {
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-Type: application/json");
-    client.println(""); //  do not forget this one
-    client.print("{\"statusPattern\": \"");
-    client.print(light.isOn?"true":"false");
-    client.println("\"}");
+  if (request.indexOf("/status_1") != -1)  {
+    client.println("HTTP/1.1 200 OK");client.println("Content-Type: application/json");client.println(""); client.print("{\"statusPattern\": \""); client.print(light1.isOn?"true":"false"); client.println("\"}");
     return;
   }
 
-  if (request.indexOf("/LED=ON") != -1)  light.turnOn();
-  if (request.indexOf("/LED=OFF") != -1)  light.turnOff();
+  if (request.indexOf("/status_2") != -1)  {
+    client.println("HTTP/1.1 200 OK");client.println("Content-Type: application/json");client.println(""); client.print("{\"statusPattern\": \""); client.print(light2.isOn?"true":"false"); client.println("\"}");
+    return;
+  }
+
+  if (request.indexOf("/status_3") != -1)  {
+    client.println("HTTP/1.1 200 OK");client.println("Content-Type: application/json");client.println(""); client.print("{\"statusPattern\": \""); client.print(light3.isOn?"true":"false"); client.println("\"}");
+    return;
+  }
+
+  if (request.indexOf("/status_4") != -1)  {
+    client.println("HTTP/1.1 200 OK");client.println("Content-Type: application/json");client.println(""); client.print("{\"statusPattern\": \""); client.print(light4.isOn?"true":"false"); client.println("\"}");
+    return;
+  }
+
+  if (request.indexOf("/io1=ON") != -1)     light1.turnOn();
+  if (request.indexOf("/io1=OFF") != -1)    light1.turnOff();
+  if (request.indexOf("/io1=TOGGLE") != -1) light1.toggle();
+ 
+  if (request.indexOf("/io2=ON") != -1)     light2.turnOn();
+  if (request.indexOf("/io2=OFF") != -1)    light2.turnOff();
+  if (request.indexOf("/io2=TOGGLE") != -1) light2.toggle();
+ 
+  if (request.indexOf("/io3=ON") != -1)     light3.turnOn();
+  if (request.indexOf("/io3=OFF") != -1)    light3.turnOff();
+  if (request.indexOf("/io3=TOGGLE") != -1) light3.toggle();
+ 
+  if (request.indexOf("/io4=ON") != -1)     light4.turnOn();
+  if (request.indexOf("/io4=OFF") != -1)    light4.turnOff();
+  if (request.indexOf("/io4=TOGGLE") != -1) light4.toggle();
  
  
   // Return the response
@@ -98,25 +118,10 @@ void handleConnection(){
   client.println("<!DOCTYPE HTML>");
   client.println("<html>");
  
-  client.print("ligth: ");
-  client.print(light.isOn?"On":"Off");
-  client.println("<br><br>");
-  client.println("<a href=\"/LED=ON\"\"><button>Turn On </button></a>");
-  client.println("<a href=\"/LED=OFF\"\"><button>Turn Off </button></a><br />");  
-
-//environment
-  client.println("<br/><br/>");
-  client.print("temperature:");
-  client.print(environment.temperature);
-  client.println("<br/>");
-  client.print("humidity:");
-  client.print(environment.humidity);
-  client.println("<br/>");
-  client.print("pressure:");
-  client.print(environment.pressure);
-  client.println("<br/>");
-  
-  
+  client.printf("io 1: %s <a href=\"/io1=TOGGLE\"\"><button>switch</button></a><br>", (light1.isOn?"On":"Off") );
+  client.printf("io 2: %s <a href=\"/io2=TOGGLE\"\"><button>switch</button></a><br>", (light2.isOn?"On":"Off") );
+  client.printf("io 3: %s <a href=\"/io3=TOGGLE\"\"><button>switch</button></a><br>", (light3.isOn?"On":"Off") );
+  client.printf("io 4: %s <a href=\"/io4=TOGGLE\"\"><button>switch</button></a><br>", (light4.isOn?"On":"Off") );
 
   client.println("</html>");
  
@@ -125,3 +130,39 @@ void handleConnection(){
   Serial.println("");
 
 };
+
+
+
+void switchCallback(int clicks) {
+  Serial.print(clicks);
+  Serial.println("");
+  
+  switch (clicks)
+  {
+  case 1:
+    if(light1.isOn){
+      light1.turnOff();
+      light2.turnOff();
+      light3.turnOff();
+      light4.turnOff();
+    }else{
+      light1.turnOn();
+    };
+    break;
+
+  case 2:
+    light2.toggle();
+    break;
+
+  case 3:
+    light3.toggle();
+    break;
+
+  case 4:
+    light4.toggle();
+    break;
+
+  default:
+    break;
+  }
+}
