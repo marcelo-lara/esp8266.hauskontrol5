@@ -74,41 +74,41 @@ void handleConnection(){
   client.flush();
  
   // Match the request
-  if (request.indexOf("/status_1") != -1)  {
+  if (request.indexOf("/status/1") != -1)  {
     client.println("HTTP/1.1 200 OK");client.println("Content-Type: application/json");client.println(""); client.print("{\"statusPattern\": \""); client.print(light1.isOn?"true":"false"); client.println("\"}");
     return;
   }
 
-  if (request.indexOf("/status_2") != -1)  {
+  if (request.indexOf("/status/2") != -1)  {
     client.println("HTTP/1.1 200 OK");client.println("Content-Type: application/json");client.println(""); client.print("{\"statusPattern\": \""); client.print(light2.isOn?"true":"false"); client.println("\"}");
     return;
   }
 
-  if (request.indexOf("/status_3") != -1)  {
+  if (request.indexOf("/status/3") != -1)  {
     client.println("HTTP/1.1 200 OK");client.println("Content-Type: application/json");client.println(""); client.print("{\"statusPattern\": \""); client.print(light3.isOn?"true":"false"); client.println("\"}");
     return;
   }
 
-  if (request.indexOf("/status_4") != -1)  {
+  if (request.indexOf("/status/4") != -1)  {
     client.println("HTTP/1.1 200 OK");client.println("Content-Type: application/json");client.println(""); client.print("{\"statusPattern\": \""); client.print(light4.isOn?"true":"false"); client.println("\"}");
     return;
   }
 
-  if (request.indexOf("/io1=ON") != -1)     light1.turnOn();
-  if (request.indexOf("/io1=OFF") != -1)    light1.turnOff();
-  if (request.indexOf("/io1=TOGGLE") != -1) light1.toggle();
+  if (request.indexOf("/set/1/on") != -1)     light1.turnOn();
+  if (request.indexOf("/set/1/off") != -1)    light1.turnOff();
+  if (request.indexOf("/set/1/toggle") != -1) light1.toggle();
  
-  if (request.indexOf("/io2=ON") != -1)     light2.turnOn();
-  if (request.indexOf("/io2=OFF") != -1)    light2.turnOff();
-  if (request.indexOf("/io2=TOGGLE") != -1) light2.toggle();
+  if (request.indexOf("/set/2/on") != -1)     light2.turnOn();
+  if (request.indexOf("/set/2/off") != -1)    light2.turnOff();
+  if (request.indexOf("/set/2/toggle") != -1) light2.toggle();
  
-  if (request.indexOf("/io3=ON") != -1)     light3.turnOn();
-  if (request.indexOf("/io3=OFF") != -1)    light3.turnOff();
-  if (request.indexOf("/io3=TOGGLE") != -1) light3.toggle();
+  if (request.indexOf("/set/3/on") != -1)     light3.turnOn();
+  if (request.indexOf("/set/3/off") != -1)    light3.turnOff();
+  if (request.indexOf("/set/3/toggle") != -1) light3.toggle();
  
-  if (request.indexOf("/io4=ON") != -1)     light4.turnOn();
-  if (request.indexOf("/io4=OFF") != -1)    light4.turnOff();
-  if (request.indexOf("/io4=TOGGLE") != -1) light4.toggle();
+  if (request.indexOf("/set/4/on") != -1)     light4.turnOn();
+  if (request.indexOf("/set/4/off") != -1)    light4.turnOff();
+  if (request.indexOf("/set/4/toggle") != -1) light4.toggle();
  
  
   // Return the response
@@ -118,10 +118,10 @@ void handleConnection(){
   client.println("<!DOCTYPE HTML>");
   client.println("<html>");
  
-  client.printf("io 1: %s <a href=\"/io1=TOGGLE\"\"><button>switch</button></a><br>", (light1.isOn?"On":"Off") );
-  client.printf("io 2: %s <a href=\"/io2=TOGGLE\"\"><button>switch</button></a><br>", (light2.isOn?"On":"Off") );
-  client.printf("io 3: %s <a href=\"/io3=TOGGLE\"\"><button>switch</button></a><br>", (light3.isOn?"On":"Off") );
-  client.printf("io 4: %s <a href=\"/io4=TOGGLE\"\"><button>switch</button></a><br>", (light4.isOn?"On":"Off") );
+  client.printf("io 1: %s <a href=\"/set/1/toggle\"\"><button>switch</button></a><br>", (light1.isOn?"On":"Off") );
+  client.printf("io 2: %s <a href=\"/set/2/toggle\"\"><button>switch</button></a><br>", (light2.isOn?"On":"Off") );
+  client.printf("io 3: %s <a href=\"/set/3/toggle\"\"><button>switch</button></a><br>", (light3.isOn?"On":"Off") );
+  client.printf("io 4: %s <a href=\"/set/4/toggle\"\"><button>switch</button></a><br>", (light4.isOn?"On":"Off") );
 
   client.println("</html>");
  
