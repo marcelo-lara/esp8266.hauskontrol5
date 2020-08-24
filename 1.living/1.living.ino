@@ -139,12 +139,12 @@ void switchCallback(int clicks) {
   
   switch (clicks)
   {
+  case -1:
+    turnAllOff();
+    break;
   case 1:
     if(light1.isOn){
-      light1.turnOff();
-      light2.turnOff();
-      light3.turnOff();
-      light4.turnOff();
+      turnAllOff();
     }else{
       light1.turnOn();
     };
@@ -165,4 +165,11 @@ void switchCallback(int clicks) {
   default:
     break;
   }
+}
+
+void turnAllOff(){
+  light1.turnOff();
+  light2.turnOff();
+  light3.turnOff();
+  light4.turnOff();
 }
