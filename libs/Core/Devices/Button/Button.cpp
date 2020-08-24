@@ -1,84 +1,73 @@
-#define inSwitch_debounce 20
-#define inSwitch_click 300
-#define inSwitch_longPress 1000
-#define inSwitch_timeout 400
+#define inSwitch_debounce 	50		
+#define inSwitch_timeout 	500
+#define inSwitch_longPress 	3000	
 
-#define btn_down 0
-#define btn_up 1
+#define btn_press 0
+#define btn_release 1
 
 #include "Button.h"
-int _lastStatus;
-int _currStatus;
+int _btn_lastStatus;
+int _btn_currStatus;
 
 Button::Button(uint8_t _switchButton){
     inSwitch=_switchButton;
     pinMode(inSwitch, INPUT_PULLUP);
-	_lastStatus=digitalRead(inSwitch);
+	_btn_lastStatus=digitalRead(inSwitch);
 };
 
 
 void Button::setup(){}
 
-unsigned long _sw_timerStart;
+unsigned long _sw_lastClick;
+unsigned long _sw_pressTime;
+
 unsigned long _sw_nextClickTimeout;
-unsigned long _sw_longPressTimeout;
-unsigned long _sw_minNextClick;
+unsigned long _sw_longPressTimeout = 0;
+unsigned long _sw_minNextClick = 0;
 int _sw_clickCount = 0;
 
 void Button::update(){
-	_currStatus=digitalRead(inSwitch);
+	_btn_currStatus=digitalRead(inSwitch);
 	
-	//are we counting clicks?
-	if(_sw_clickCount>0){
+	// deliver click count on release
+	if(_sw_clickCount > 0 && _btn_currStatus==btn_release && millis() > _sw_nextClickTimeout) {
+	    swCallback(_sw_clickCount);
+		_sw_clickCount=0;
+		_sw_longPressTimeout = 0;
+	}
 
-		//debounce ignore
-		if(_sw_minNextClick<inSwitch_debounce){
-			Serial.println("debounce> ignoring");
-            return;
+	// trap longpress
+	if(_sw_longPressTimeout > 0 && _btn_currStatus==btn_press && _sw_longPressTimeout < millis()){
+		_sw_clickCount=-1;
+		_sw_longPressTimeout = 0;
+		swCallback(_sw_clickCount);
+		return;
+	}
+
+	// test current status
+	if(_btn_lastStatus == _btn_currStatus) return;
+	_btn_lastStatus = _btn_currStatus;
+	_sw_pressTime = millis() - _sw_lastClick;
+
+
+	//button position changed
+	if(_btn_currStatus==btn_press){
+		_sw_lastClick = millis();
+		_sw_longPressTimeout = _sw_lastClick + inSwitch_longPress;
+	}
+	else
+	{
+		//ignore back from longpress
+		if(_sw_clickCount==-1){
+			_sw_clickCount=0;
+			return;
 		}
+	
+		if(_sw_pressTime<inSwitch_debounce) return;
 
-    //button released.. click timeout?
-    if(_currStatus==btn_up && _sw_nextClickTimeout<millis()){
-      //no more wait, send click event
-      swCallback(_sw_clickCount);
-      //reset counters
-      _sw_clickCount=0;
-      _lastStatus=_currStatus;
-    }
-
-    //it's longpress timeout?
-    if(_sw_longPressTimeout<millis()){
-      //send longpress event
-      swCallback(-1);
-
-      //reset counters
-      _sw_clickCount=0;
-      _lastStatus=_currStatus;
-    }
-    
-	}
-
-	//we're not counting clicks, something changed?
-	if(_lastStatus==_currStatus) return;
-	_lastStatus=_currStatus;
-
-	//button is pressed
-	if(_currStatus==btn_down){
+		// count click
 		_sw_clickCount++;
-		_sw_timerStart=millis();
-		_sw_longPressTimeout=_sw_timerStart+inSwitch_longPress;
-		_sw_nextClickTimeout=millis()+inSwitch_timeout;
-		_sw_minNextClick=millis()+inSwitch_debounce;
-	}
-
-	//button is released
-	else{
-
-    //maybe released after longpress, ignoring
-    if(_sw_clickCount==0) return;
-
-    //count click
-		unsigned long elapsed=millis()-_sw_timerStart;
-		_sw_nextClickTimeout=millis()+inSwitch_timeout;
+		_sw_nextClickTimeout = millis() + inSwitch_timeout;
+		_sw_longPressTimeout = 0;
 	}
 }
