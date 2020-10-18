@@ -12,10 +12,12 @@
 #define lightOut        4 // D2
 
 //fan
-#define out1           15 // D8
-#define out2           14 // D5
-#define out3           12 // D6
-#define out4           13 // D7
+#define fanOut1           13 // D7
+#define fanOut2           12 // D6
+#define fanOut3           14 // D5
+#define fanOut4           15 // D8
+#define defSpeed           4 // default speed
+///////////////////////////////////////////
 
 WiFiServer server(80);
 
@@ -24,6 +26,10 @@ Button wallSwitch(wallSwitchPin);
 
 #include "src/Core/Devices/Light/Light.h"
 Light light(lightOut, true); // main
+void handleLight(String *args);
+
+#include "src/Core/Devices/Fan/Fan.h"
+Fan fan(fanOut1, fanOut2, fanOut3, fanOut4, defSpeed); // suite fan
 
 void setup() {
   pinMode(statusLedPin, OUTPUT);
@@ -67,24 +73,26 @@ void handleConnection(){
   if (!client) return;
  
   // Wait until the client sends some data
-  Serial.println("new client");
   while(!client.available()){delay(1);}
  
   // Read the first line of the request
   String request = client.readStringUntil('\r');
+  Serial.print("request> ");
   Serial.println(request);
   client.flush();
- 
+
   // Match the request
-  if (request.indexOf("/status/1") != -1)  {
+  if (request.indexOf("/status/light/1") != -1)  {
     client.println("HTTP/1.1 200 OK");client.println("Content-Type: application/json");client.println(""); client.print("{\"statusPattern\": \""); client.print(light.isOn?"true":"false"); client.println("\"}");
     return;
   }
 
-  if (request.indexOf("/set/1/on") != -1)     light.turnOn();
-  if (request.indexOf("/set/1/off") != -1)    light.turnOff();
-  if (request.indexOf("/set/1/toggle") != -1) light.toggle();
+  //light
+  if (request.indexOf("/set/light/") != -1) handleLight(&request);
  
+  //fan
+  if (request.indexOf("/set/fan/") != -1) handleFan(&request);
+
   // Return the response
   client.println("HTTP/1.1 200 OK");
   client.println("Content-Type: text/html");
@@ -93,16 +101,36 @@ void handleConnection(){
   client.println("<html>");
   client.printf("<h1>%s</h1>","suite" );
  
-  client.printf("light 1: %s <a href=\"/set/1/toggle\"\"><button>switch</button></a><br>", (light.isOn?"On":"Off") );
+  client.printf("light: %s <a href=\"/set/light/1/toggle\"\"><button>switch</button></a><br>", (light.isOn?"On":"Off") );
+  client.printf("fan:   %i \
+    <a href=\"/set/fan/off\"\"><button>off</button></a>\
+    <a href=\"/set/fan/speed/1\"\"><button>1</button></a>\
+    <a href=\"/set/fan/speed/2\"\"><button>2</button></a>\
+    <a href=\"/set/fan/speed/3\"\"><button>3</button></a>\
+    <a href=\"/set/fan/speed/4\"\"><button>4</button></a>\
+    <a href=\"/set/fan/on\"\"><button>on</button></a>\
+    <br>", (fan.speed) );
 
   client.println("</html>");
  
   delay(1);
-  Serial.println("Client disonnected");
-  Serial.println("");
-
 };
 
+void handleLight(String *args){
+  if (args->indexOf("/set/light/1/on") != -1)     light.turnOn();
+  if (args->indexOf("/set/light/1/off") != -1)    light.turnOff();
+  if (args->indexOf("/set/light/1/toggle") != -1) light.toggle();
+};
+
+void handleFan(String *args){
+  if (args->indexOf("/set/fan/on") != -1)      fan.turnOn();
+  if (args->indexOf("/set/fan/off") != -1)     fan.turnOff();
+  if (args->indexOf("/set/fan/toggle") != -1)  fan.toggle();
+  if (args->indexOf("/set/fan/speed/1") != -1) fan.setSpeed(1);
+  if (args->indexOf("/set/fan/speed/2") != -1) fan.setSpeed(2);
+  if (args->indexOf("/set/fan/speed/3") != -1) fan.setSpeed(3);
+  if (args->indexOf("/set/fan/speed/4") != -1) fan.setSpeed(4);
+};
 
 
 void switchCallback(int clicks) {
