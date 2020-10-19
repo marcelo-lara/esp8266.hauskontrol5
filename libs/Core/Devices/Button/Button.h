@@ -2,6 +2,10 @@
 #include "Arduino.h"
 typedef void SwCallback(int clickCount);
 
+#define BTN_CLICK		 1
+#define BTN_LONGCLICK	-1
+#define BTN_DBLCLICK	 2
+
 class Button{
 public:
   Button(uint8_t _switchButton);

@@ -16,7 +16,7 @@
 #define fanOut2           12 // D6
 #define fanOut3           14 // D5
 #define fanOut4           15 // D8
-#define defSpeed           4 // default speed
+#define defSpeed           3 // default speed
 ///////////////////////////////////////////
 
 WiFiServer server(80);
@@ -134,7 +134,24 @@ void handleFan(String *args){
 
 
 void switchCallback(int clicks) {
-  Serial.print(clicks);
-  Serial.println("");
-  light.toggle();  
+
+  switch (clicks)
+  {
+  case BTN_CLICK:
+    light.toggle();
+    break;
+  
+  case BTN_DBLCLICK:
+    fan.turnOn();
+    break;
+
+  case BTN_LONGCLICK:
+    light.turnOff();
+    fan.turnOff();
+    break;
+
+  default:
+    break;
+  }
+    
 }
