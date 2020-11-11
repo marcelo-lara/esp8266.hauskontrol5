@@ -4,7 +4,11 @@
             "name": "Win32",
             "includePath": [
                 "C:\\Users\\darkangel\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\**",
-                "C:\\Users\\darkangel\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.1\\**"
+                "C:\\Users\\darkangel\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.1\\**",
+                "/usr/lib/arduino-1.8.13/hardware/tools/avr/**",
+                "/home/marcelolara/.arduino15/packages/esp8266/hardware/esp8266/2.7.4/**",
+                "/home/marcelolara/.arduino15/packages/esp8266/tools/**",
+                "/usr/lib/arduino-1.8.13/hardware/arduino/avr/cores/arduino/**"
             ],
             "forcedInclude": [],
             "intelliSenseMode": "msvc-x64",
