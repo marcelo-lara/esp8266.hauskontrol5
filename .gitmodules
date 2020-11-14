@@ -1,0 +1,3 @@
+[submodule "libs/wemos.setup"]
+	path = libs/wemos.setup
+	url = git@github.com:marcelo-lara/wemos.setup.git

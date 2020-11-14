@@ -17,4 +17,8 @@ ln -sf $PWD/libs/Core $PWD/1.living/src/Core
 ln -sf $PWD/libs/Core $PWD/2.office/src/Core
 ln -sf $PWD/libs/Core $PWD/3.suite/src/Core
 
+ln -sf $PWD/libs/wemos.setup $PWD/1.living/src/wemos.setup
+ln -sf $PWD/libs/wemos.setup $PWD/2.office/src/wemos.setup
+ln -sf $PWD/libs/wemos.setup $PWD/3.suite/src/wemos.setup
+
 ```
