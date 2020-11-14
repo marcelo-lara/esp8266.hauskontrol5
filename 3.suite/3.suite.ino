@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include "wemos.setup.h"
+#include "src/wemos.setup/wemos.setup.h"
 
 /////////////////////////////////////////
 // Hardware Setup
@@ -67,25 +67,29 @@ void loop() {
  
 }
 
+long _req_timeout;
+
 void handleConnection(){
   // Check if a client has connected
   WiFiClient client = server.available();
   if (!client) return;
+  Serial.print("has client..");
  
   // Wait until the client sends some data
-  while(!client.available()){delay(1);}
- 
+  _req_timeout = millis() + 500;
+  while(!client.available() || millis()<_req_timeout){delay(1);}
+  Serial.print("connection received..");
+
   // Read the first line of the request
   String request = client.readStringUntil('\r');
   Serial.print("request> ");
   Serial.println(request);
   client.flush();
 
+  // match status
+  if (request.indexOf("/status/") != -1) handleStatus(&request, &client);
+
   // Match the request
-  if (request.indexOf("/status/light/1") != -1)  {
-    client.println("HTTP/1.1 200 OK");client.println("Content-Type: application/json");client.println(""); client.print("{\"statusPattern\": \""); client.print(light.isOn?"true":"false"); client.println("\"}");
-    return;
-  }
 
   //light
   if (request.indexOf("/set/light/") != -1) handleLight(&request);
@@ -98,7 +102,7 @@ void handleConnection(){
   client.println("Content-Type: text/html");
   client.println(""); //  do not forget this one
   client.println("<!DOCTYPE HTML>");
-  client.println("<html>");
+  client.println("<html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body>");
   client.printf("<h1>%s</h1>","suite" );
  
   client.printf("light: %s <a href=\"/set/light/1/toggle\"\"><button>switch</button></a><br>", (light.isOn?"On":"Off") );
@@ -110,11 +114,34 @@ void handleConnection(){
     <a href=\"/set/fan/speed/4\"\"><button>4</button></a>\
     <a href=\"/set/fan/on\"\"><button>on</button></a>\
     <br>", (fan.speed) );
-
-  client.println("</html>");
+  client.println("</body></html>");
+  client.println(""); //  do not forget this one
  
   delay(1);
 };
+
+void handleStatus(String *args, WiFiClient *client){
+  client->println("HTTP/1.1 200 OK");
+  client->println("Content-Type: application/json");
+  client->println(""); //  do not forget this one
+
+  //light
+  if (args->indexOf("/status/light/1") != -1)  {
+    client->print("{\"statusPattern\": \""); 
+    client->print(light.isOn?"true":"false"); 
+    client->println("\"}");
+    return;
+  }
+
+  //fan
+  if (args->indexOf("/status/fan") != -1)  {
+    client->print("{\"speed\": \""); 
+    client->print(fan.speed); 
+    client->println("\"}");
+    return;
+  }
+
+}
 
 void handleLight(String *args){
   if (args->indexOf("/set/light/1/on") != -1)     light.turnOn();
