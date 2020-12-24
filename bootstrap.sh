@@ -1,12 +1,13 @@
 
-#git submodule update --init --recursive
+# repo
+git submodule update --init --recursive
 
+## init folders
 Nodes=(
     "1.living"
     "2.office" 
     "3.suite"
 )
-
 
 # set folders
 for node in "${Nodes[@]}"; do
