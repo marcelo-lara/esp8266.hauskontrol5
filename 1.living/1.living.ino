@@ -35,7 +35,7 @@ void setup() {
   light[0].turnOn();
 
   //connect
-  wemosWiFi.connect("dummy");
+  wemosWiFi.connect("living");
   light[0].turnOff();
 
   // Start the server
