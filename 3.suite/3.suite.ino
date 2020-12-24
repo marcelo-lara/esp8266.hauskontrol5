@@ -135,8 +135,10 @@ void handleStatus(String *args, WiFiClient *client){
 
   //fan
   if (args->indexOf("/status/fan") != -1)  {
-    client->print("{\"speed\": \""); 
-    client->print(fan.speed); 
+    client->print("{\"statusPattern\": \""); 
+    client->print(fan.isOn?"true":"false"); 
+    // client->print("{\"speed\": \""); 
+    // client->print(fan.speed); 
     client->println("\"}");
     return;
   }
@@ -169,7 +171,7 @@ void switchCallback(int clicks) {
     break;
   
   case BTN_DBLCLICK:
-    fan.turnOn();
+    fan.toggle();
     break;
 
   case BTN_LONGCLICK:
