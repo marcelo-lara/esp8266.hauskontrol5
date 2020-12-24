@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include "wemos.setup.h"
+#include "src/wemos.setup/wemos.setup.h"
 
 /////////////////////////////////////////
 // Hardware Setup
@@ -19,6 +19,9 @@ Button wallSwitch(wallSwitchPin);
 
 #include "src/Core/Devices/Light/Light.h"
 Light light(relayOutPin, true);
+
+#include "src/Core/Devices/AC/AC.h"
+AC ac(irSendPin, 24);
 
 #include "src/Core/Devices/Environment/Environment.h"
 Environment environment;
@@ -76,20 +79,11 @@ void handleConnection(){
   Serial.println(request);
   client.flush();
  
-  // Match the request
-  if (request.indexOf("/STATUS") != -1)  {
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-Type: application/json");
-    client.println(""); //  do not forget this one
-    client.print("{\"statusPattern\": \"");
-    client.print(light.isOn?"true":"false");
-    client.println("\"}");
-    return;
-  }
+  if (request.indexOf("/status/") != -1) 
+    return handleStatus(&request, &client);
 
-  if (request.indexOf("/LED=ON") != -1)  light.turnOn();
-  if (request.indexOf("/LED=OFF") != -1)  light.turnOff();
- 
+  if (request.indexOf("/set/") != -1) 
+    handleCommand(&request, &client);
  
   // Return the response
   client.println("HTTP/1.1 200 OK");
@@ -98,14 +92,21 @@ void handleConnection(){
   client.println("<!DOCTYPE HTML>");
   client.println("<html>");
  
-  client.print("ligth: ");
+  client.print("<h2>light</h2>");
   client.print(light.isOn?"On":"Off");
-  client.println("<br><br>");
-  client.println("<a href=\"/LED=ON\"\"><button>Turn On </button></a>");
-  client.println("<a href=\"/LED=OFF\"\"><button>Turn Off </button></a><br />");  
+  client.println("<a href=\"/set/light/on\"\"><button>Turn On </button></a>");
+  client.println("<a href=\"/set/light/off\"> <button>Turn Off </button></a><br />");  
+
+//ac
+  client.print("<h2>AC</h2> ");
+  client.print(ac.isOn?"On":"Off");
+  client.println("<a href=\"/set/ac/on\"\"><button>Turn On </button></a>");
+  client.println("<a href=\"/set/ac/off\"> <button>Turn Off </button></a><br />");  
 
 //environment
-  client.println("<br/><br/>");
+  client.print("<h2>Environment</h2>");
+  client.print(environment.isOn?"On":"Off");
+  client.println("<br/>");
   client.print("temperature:");
   client.print(environment.temperature);
   client.println("<br/>");
@@ -125,3 +126,48 @@ void handleConnection(){
   Serial.println("");
 
 };
+
+void handleStatus(String *args, WiFiClient *client){
+  client->println("HTTP/1.1 200 OK");
+  client->println("Content-Type: application/json");
+  client->println(""); //  do not forget this one
+  bool _status = false;
+
+  //light
+  if (args->indexOf("/status/light") != -1) 
+    _status = light.isOn;
+
+  //ac
+  if (args->indexOf("/status/ac") != -1)  
+    _status = ac.isOn;
+
+  //env sensor
+  if (args->indexOf("/status/env") != -1)  
+    _status = environment.isOn;
+
+  client->print("{\"statusPattern\": \""); 
+  client->print(_status?"true":"false"); 
+  client->println("\"}");
+
+}
+
+void handleCommand(String *args, WiFiClient *client){
+
+  //light
+  if (args->indexOf("/set/light/") != -1){
+    if (args->indexOf("/set/light/on") != -1) light.turnOn();
+    if (args->indexOf("/set/light/off") != -1) light.turnOff();
+    if (args->indexOf("/set/light/toggle") != -1) light.toggle();
+  } 
+
+  //air conditioner
+  if (args->indexOf("/set/ac/") != -1){
+    // on/off
+    if (args->indexOf("/set/ac/on") != -1) ac.turnOn();
+    if (args->indexOf("/set/ac/off") != -1) ac.turnOff();
+
+    // settings
+
+  } 
+
+}

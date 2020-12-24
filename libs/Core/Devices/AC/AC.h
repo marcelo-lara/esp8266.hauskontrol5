@@ -15,6 +15,8 @@ public:
     //details
     void setTemp(int _temp);
     int  temp;
+    bool fanOn;
+    bool swingOn;
 
 private:
     int irOut;
