@@ -14,6 +14,8 @@ public:
     void setup();
     void update();
 
+    bool isOn;
+
 private:
     long lastUpdated;
 

@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <BMx280I2C.h>
 #define I2C_ADDRESS 0x76
-BMx280I2C bmx280(I2C_ADDRESS);
+BMx280I2C bmx280(I2C_ADDRESS);  // requires git@github.com:marcelo-lara/BMx280MI-1.git
 
 #include "../Core/Devices/Environment/Environment.h"
 
@@ -10,6 +10,7 @@ bool _measuring = false;
 
 void Environment::setup(){
     Serial.print("Environment| ");
+    this->isOn=false;
 	Wire.begin();
 	if (!bmx280.begin()){
         lastUpdated=-1;
@@ -30,6 +31,7 @@ void Environment::setup(){
 		bmx280.writeOversamplingHumidity(BMx280MI::OSRS_H_x16);
 
     lastUpdated=0;
+    this->isOn=true;
 
     Serial.println("online");
 };
