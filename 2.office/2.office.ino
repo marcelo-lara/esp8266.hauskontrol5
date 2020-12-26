@@ -20,14 +20,13 @@ Button wallSwitch(wallSwitchPin);
 #include "src/Core/Devices/Light/Light.h"
 Light light(relayOutPin, true);
 
-#include "src/Core/Devices/AC/AC.h"
-AC ac(irSendPin, 24);
-
 #include "src/Core/Devices/Environment/Environment.h"
 Environment environment;
 
 
 void setup() {
+  Serial.begin(115200,SERIAL_8N1,SERIAL_TX_ONLY);
+
   pinMode(statusLedPin, OUTPUT);
   digitalWrite(statusLedPin, LOW);
 
@@ -97,12 +96,6 @@ void handleConnection(){
   client.println("<a href=\"/set/light/on\"\"><button>Turn On </button></a>");
   client.println("<a href=\"/set/light/off\"> <button>Turn Off </button></a><br />");  
 
-//ac
-  client.print("<h2>AC</h2> ");
-  client.print(ac.isOn?"On":"Off");
-  client.println("<a href=\"/set/ac/on\"\"><button>Turn On </button></a>");
-  client.println("<a href=\"/set/ac/off\"> <button>Turn Off </button></a><br />");  
-
 //environment
   client.print("<h2>Environment</h2>");
   client.print(environment.isOn?"On":"Off");
@@ -137,10 +130,6 @@ void handleStatus(String *args, WiFiClient *client){
   if (args->indexOf("/status/light") != -1) 
     _status = light.isOn;
 
-  //ac
-  if (args->indexOf("/status/ac") != -1)  
-    _status = ac.isOn;
-
   //env sensor
   if (args->indexOf("/status/env") != -1)  
     _status = environment.isOn;
@@ -158,16 +147,6 @@ void handleCommand(String *args, WiFiClient *client){
     if (args->indexOf("/set/light/on") != -1) light.turnOn();
     if (args->indexOf("/set/light/off") != -1) light.turnOff();
     if (args->indexOf("/set/light/toggle") != -1) light.toggle();
-  } 
-
-  //air conditioner
-  if (args->indexOf("/set/ac/") != -1){
-    // on/off
-    if (args->indexOf("/set/ac/on") != -1) ac.turnOn();
-    if (args->indexOf("/set/ac/off") != -1) ac.turnOff();
-
-    // settings
-
   } 
 
 }

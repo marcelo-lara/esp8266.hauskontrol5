@@ -6,6 +6,8 @@ class AC {
 public:
     AC(int _irOut, int defaultTemp);
     
+    void init();
+
     //base
     void turnOn();
     void turnOff();
