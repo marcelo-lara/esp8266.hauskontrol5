@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NodeName</title>
     <style>
-        html,body{margin:0;padding: 0;background-color: #222;font-family: sans-serif;}
+        html,body{margin:0;padding: 0;background-color: #222;color: #bbb;font-family: sans-serif;}
         .devs {display: flex; flex-flow: row; flex-wrap: wrap;}
         .devs>a{display:flex;align-content: center;width: 25vw; max-width: 250px; height: 25vw;max-height: 250px; align-items: center; justify-content: center;}
         a{margin:0; cursor: pointer;flex: 1 0 auto;display: flex;background-color: #333; color: #aaa; text-decoration: none;}
-        h1{display: block; color: #bbb; padding: .5em;margin:0}
+        h1{display: block;  padding: .5em;margin:0}
+        h2{display: block;  padding: .5em 0 .2em .2em;margin:0}
         .on{background-color: #0a0;color: #fff}
         @media screen and (max-width: 480px) {
             a {min-width: 33vw; width: 33vw;min-height: 33vw;height: 33vw;}
@@ -19,7 +20,7 @@
 </head>
 <body>
     <h1>Living</h1>
-    <div class="devs">
+    <!-- <div class="devs">
         <a href="/set/1/off" class="on">io1</a>
         <a href="/set/1/off">io2</a>
         <a href="/set/1/off">io3</a>
@@ -27,6 +28,19 @@
         <a href="/set/1/off" class="on">io5</a>
         <a href="/set/1/off">io6</a>
         <a href="/set/1/off">io7</a>
+    </div> -->
+    <h2>AC</h2>
+    <div class="devs">
+        <a href="/set/1/off" class="on">on</a>
+        <a href="/set/1/off" class="off">fan</a>
+        <a href="/set/1/off" class="on">swing</a>
     </div>
+    <h2>Env</h2>
+    <div class="env">
+        <div class="tmp">24.5°</div>
+        <div class="hum">54.5%</div>
+        <div class="pre">1008hPa</div>
+    </div>    
+
 </body>
 </html>
