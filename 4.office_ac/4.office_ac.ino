@@ -24,7 +24,7 @@ void setup() {
   ac.init();
 
   //connect
-  wemosWiFi.connect("office");
+  wemosWiFi.connect("officeac");
 
   // Start the server
   server.begin();
@@ -85,15 +85,15 @@ void handleConnection(){
   client.print("<h2>Environment</h2>");
   client.print(environment.isOn?"On":"Off");
   client.println("<br/>");
-  client.print("temperature:");
+  client.print("temperature: ");
   client.print(environment.temperature);
-  client.println("<br/>");
-  client.print("humidity:");
+  client.println("°<br/>");
+  client.print("humidity: ");
   client.print(environment.humidity);
-  client.println("<br/>");
-  client.print("pressure:");
+  client.println("%<br/>");
+  client.print("pressure: ");
   client.print(environment.pressure);
-  client.println("<br/>");
+  client.println("hPa<br/>");
 
   client.println("</html>");
  
