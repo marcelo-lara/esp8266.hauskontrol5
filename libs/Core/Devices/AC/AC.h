@@ -14,11 +14,18 @@ public:
     void toggle();
     bool isOn;
 
-    //details
-    void setTemp(int _temp);
-    int  temp;
-    bool fanOn;
-    bool swingOn;
+    //temp
+    void setTemp(uint _temp);
+    uint  temp;
+   
+    //fan/flow
+    uint  flow;
+    void setFlow(uint _flow_level);
+
+    //swing
+    bool swing;
+    void swingOn();
+    void swingOff();
 
 private:
     int irOut;

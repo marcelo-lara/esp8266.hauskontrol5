@@ -15,13 +15,14 @@ const uint8_t kAc_Flow_Tower[3] = {0, 4, 6};
 const uint8_t kAc_Flow_Wall[4] = {0, 2, 4, 5};    
 
 //private
-void Ac_Activate(unsigned int temperature, unsigned int air_flow, unsigned int heat);
-void Ac_Send_Code(uint32_t code);
-
+void ac_update(unsigned int temperature, unsigned int air_flow);
 
 AC::AC(int _irOut, int defaultTemp) 
 {
-    
+    // defaults
+    temp  = 23;
+    flow  = 0;
+    swing = true;
 }
 
 void AC::init(){
@@ -32,8 +33,7 @@ void AC::init(){
 void AC::turnOn() 
 {
     Serial.println("-- AC::turnOn() --");
-    Ac_Activate(23, 2, 0);
-
+    ac_update(this->temp, this->flow);
     this->isOn=true;
 }
 
@@ -45,37 +45,48 @@ void AC::turnOff()
 
 void AC::toggle() 
 {
-    this->isOn=!(this->isOn);
+    if(this->isOn)
+      this->turnOff();
+    else
+      this->turnOn();
 }
 
-void AC::setTemp(int _temp) 
+////////////////////////////////////////////////////////////////////////
+
+void AC::swingOn(){
+  irsend.sendLG(0x8810001, 28);
+  this->swing=true;
+};
+void AC::swingOff(){
+  irsend.sendLG(0x8810001, 28);
+  this->swing=false;
+};
+
+////////////////////////////////////////////////////////////////////////
+
+void AC::setTemp(uint _temp) 
 {
-    
+    if(_temp < 18) _temp = 18;
+    if(_temp > 26) _temp = 26;
+    this->temp=_temp;
+    ac_update(this->temp, this->flow);
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void AC::setFlow(uint _flow){
+  if(_flow>2) _flow=2;
+  this->flow=_flow;
+  ac_update(this->temp, this->flow);
 }
 
 uint32_t ac_code_to_sent;
 
-void Ac_Send_Code(uint32_t code) {
-  Serial.print("code to send : ");
-  Serial.print(code, BIN);
-  Serial.print(" : ");
-  Serial.println(code, HEX);
-
-  irsend.sendLG(code, 28);
-}
-
-void Ac_Activate(unsigned int temperature, unsigned int air_flow,
-                 unsigned int heat) {
-  Serial.println("-- Ac_Activate");
-  ac_heat = heat;
+void ac_update(unsigned int temperature, unsigned int air_flow) {
   unsigned int ac_msbits1 = 8;
   unsigned int ac_msbits2 = 8;
   unsigned int ac_msbits3 = 0;
-  unsigned int ac_msbits4;
-  if (ac_heat == 1)
-    ac_msbits4 = 4;  // heating
-  else
-    ac_msbits4 = 0;  // cooling
+  unsigned int ac_msbits4 = 0; // cooling | 4:heat
   unsigned int ac_msbits5 =  (temperature < 15) ? 0 : temperature - 15;
   unsigned int ac_msbits6 = 0;
 
@@ -98,13 +109,4 @@ void Ac_Activate(unsigned int temperature, unsigned int air_flow,
 
   irsend.sendLG(ac_code_to_sent, 28);
 
-
-}
-
-void Ac_Power_Down() {
-  ac_code_to_sent = 0x88C0051;
-
-  Ac_Send_Code(ac_code_to_sent);
-
-  ac_power_on = 0;
 }

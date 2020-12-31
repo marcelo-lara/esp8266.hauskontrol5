@@ -61,6 +61,14 @@ void handleConnection(){
   String request = client.readStringUntil('\r');
   Serial.println(request);
   client.flush();
+  if (request.indexOf("/favicon.ico") != -1) {
+    client.println("HTTP/1.1 404 Not Found");
+    client.println("Content-Type: text/html");
+    client.println(""); //  do not forget this one
+    delay(1);
+
+    return;
+  }
  
   if (request.indexOf("/status/") != -1) 
     return handleStatus(&request, &client);
@@ -77,9 +85,32 @@ void handleConnection(){
  
 //ac
   client.print("<h2>AC</h2> ");
+  
+  client.print("<p>status: ");
   client.print(ac.isOn?"On":"Off");
-  client.println("<a href=\"/set/ac/on\"\"><button>Turn On </button></a>");
-  client.println("<a href=\"/set/ac/off\"> <button>Turn Off </button></a><br />");  
+  client.print("<a href=\"/set/ac/on\"\"><button>on</button></a>");
+  client.print("<a href=\"/set/ac/off\"><button>off</button></a></p>");  
+  
+  client.print("<p>temp: ");
+  client.print(ac.temp);
+  client.print("<a href=\"/set/ac/temp/21\"\"><button>21</button></a>");
+  client.print("<a href=\"/set/ac/temp/22\"\"><button>22</button></a>");
+  client.print("<a href=\"/set/ac/temp/23\"\"><button>23</button></a>");
+  client.print("<a href=\"/set/ac/temp/24\"\"><button>24</button></a>");
+  client.print("<a href=\"/set/ac/temp/25\"\"><button>25</button></a>");
+  client.print("</p>");  
+  
+  client.print("<p>airflow: ");
+  client.print(ac.flow);
+  client.print("<a href=\"/set/ac/flow/0\"\"><button>min</button></a>");
+  client.print("<a href=\"/set/ac/flow/1\"\"><button>med</button></a>");
+  client.print("<a href=\"/set/ac/flow/2\"\"><button>max</button></a>");
+  client.print("</p>");  
+
+  client.print("<p>swing: ");
+  client.print(ac.swing?"On":"Off");
+  client.print("<a href=\"/set/ac/swing/on\"\"><button>On</button></a>");
+  client.print("<a href=\"/set/ac/swing/off\"><button>Off</button></a></p>");  
 
 //environment
   client.print("<h2>Environment</h2>");
@@ -87,7 +118,7 @@ void handleConnection(){
   client.println("<br/>");
   client.print("temperature: ");
   client.print(environment.temperature);
-  client.println("°<br/>");
+  client.println("&#176;<br/>");
   client.print("humidity: ");
   client.print(environment.humidity);
   client.println("%<br/>");
@@ -107,6 +138,7 @@ void handleStatus(String *args, WiFiClient *client){
   client->println("HTTP/1.1 200 OK");
   client->println("Content-Type: application/json");
   client->println(""); //  do not forget this one
+
   bool _status = false;
 
   //ac
@@ -120,6 +152,7 @@ void handleStatus(String *args, WiFiClient *client){
   client->print("{\"statusPattern\": \""); 
   client->print(_status?"true":"false"); 
   client->println("\"}");
+  delay(1);
 
 }
 
@@ -127,9 +160,26 @@ void handleCommand(String *args, WiFiClient *client){
 
   //air conditioner
   if (args->indexOf("/set/ac/") != -1){
+    
     // on/off
-    if (args->indexOf("/set/ac/on") != -1) ac.turnOn();
-    if (args->indexOf("/set/ac/off") != -1) ac.turnOff();
+    if (args->indexOf("/set/ac/on") != -1)      ac.turnOn();
+    if (args->indexOf("/set/ac/off") != -1)     ac.turnOff();
+
+    // temp
+    if (args->indexOf("/set/ac/temp/21") != -1) ac.setTemp(21);
+    if (args->indexOf("/set/ac/temp/22") != -1) ac.setTemp(22);
+    if (args->indexOf("/set/ac/temp/23") != -1) ac.setTemp(23);
+    if (args->indexOf("/set/ac/temp/24") != -1) ac.setTemp(24);
+    if (args->indexOf("/set/ac/temp/25") != -1) ac.setTemp(25);
+
+    // airflow
+    if (args->indexOf("/set/ac/flow/0") != -1)  ac.setFlow(0);
+    if (args->indexOf("/set/ac/flow/1") != -1)  ac.setFlow(1);
+    if (args->indexOf("/set/ac/flow/2") != -1)  ac.setFlow(2);
+
+    // swing
+    if (args->indexOf("/set/ac/swing/on") != -1)  ac.swingOn();
+    if (args->indexOf("/set/ac/swing/off") != -1) ac.swingOff();
 
   } 
 
