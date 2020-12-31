@@ -2,6 +2,10 @@
 # repo
 git submodule update --init --recursive
 
+ln -sf $PWD/libs/IRremoteESP8266 /home/$USER/Arduino/libraries/IRremoteESP8266
+ln -sf $PWD/libs/BMx280MI-1 /home/$USER/Arduino/libraries/BMx280MI-1
+
+
 ## init folders
 Nodes=(
     "1.living"

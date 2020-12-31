@@ -1,3 +1,9 @@
 [submodule "libs/wemos.setup"]
 	path = libs/wemos.setup
 	url = git@github.com:marcelo-lara/wemos.setup.git
+[submodule "libs/IRremoteESP8266"]
+	path = libs/IRremoteESP8266
+	url = git@github.com:marcelo-lara/IRremoteESP8266.git
+[submodule "libs/BMx280MI-1"]
+	path = libs/BMx280MI-1
+	url = git@github.com:marcelo-lara/BMx280MI-1.git
