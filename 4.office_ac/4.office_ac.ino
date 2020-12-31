@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>   // Include the WebServer library
+#include <uri/UriRegex.h>
 #include "src/wemos.setup/wemos.setup.h"
 
 /////////////////////////////////////////
@@ -9,7 +11,11 @@
 #define bme280_sda      4 // D2 SDA (bme280)
 #define wifiLedPin      2 // D4 builtIn led
 
-WiFiServer server(80);
+// WiFiServer server(80);
+ESP8266WebServer server(80);    // Create a webserver object that listens for HTTP request on port 80
+
+//helpers
+
 
 #include "src/Core/Devices/AC/AC.h"
 AC ac(irSendPin, 24);
@@ -26,9 +32,30 @@ void setup() {
   //connect
   wemosWiFi.connect("officeac");
 
-  // Start the server
+  // web ui
+  server.on("/",                []() { server.send(200, "text/html", ui_root()); return; });
+  server.on("/status",          []() { server.send(200, "application/json", status_json()); return; });
+
+  // ac settings
+  server.on("/set/ac/on",       []() { ac.turnOn();    return return_result(); });
+  server.on("/set/ac/off",      []() { ac.turnOff();   return return_result(); });
+
+  server.on("/set/ac/temp/21",  []() { ac.setTemp(21); return return_result(); });
+  server.on("/set/ac/temp/22",  []() { ac.setTemp(22); return return_result(); });
+  server.on("/set/ac/temp/23",  []() { ac.setTemp(23); return return_result(); });
+  server.on("/set/ac/temp/24",  []() { ac.setTemp(24); return return_result(); });
+  server.on("/set/ac/temp/25",  []() { ac.setTemp(25); return return_result(); });
+
+  server.on("/set/ac/flow/0",   []() { ac.setFlow(0);  return return_result(); });
+  server.on("/set/ac/flow/1",   []() { ac.setFlow(1);  return return_result(); });
+  server.on("/set/ac/flow/2",   []() { ac.setFlow(2);  return return_result(); });
+
+  server.on("/set/ac/swing/on", []() { ac.swingOn();   return return_result(); });
+  server.on("/set/ac/swing/off",[]() { ac.swingOff();  return return_result(); });
+
+  server.onNotFound([](){server.send(404, "text/plain", "404: Not found");});  
   server.begin();
- 
+  
   //non-critical hardware
   environment.setup();
 
@@ -37,150 +64,91 @@ void setup() {
   Serial.print("http://");
   Serial.print(WiFi.localIP());
   Serial.println("/");
- 
+
 }
- 
+
 void loop() {
   wemosWiFi.update();
 
   environment.update();
-  handleConnection();
- 
+  server.handleClient();
+
 }
 
-void handleConnection(){
-  // Check if a client has connected
-  WiFiClient client = server.available();
-  if (!client) return;
- 
-  // Wait until the client sends some data
-  Serial.println("new client");
-  while(!client.available()){delay(1);}
- 
-  // Read the first line of the request
-  String request = client.readStringUntil('\r');
-  Serial.println(request);
-  client.flush();
-  if (request.indexOf("/favicon.ico") != -1) {
-    client.println("HTTP/1.1 404 Not Found");
-    client.println("Content-Type: text/html");
-    client.println(""); //  do not forget this one
-    delay(1);
+void return_result(){
+  server.send(200, "text/plain", "OK"); // Send 
+}
 
-    return;
-  }
- 
-  if (request.indexOf("/status/") != -1) 
-    return handleStatus(&request, &client);
+String ui_root(){
+  String r_body;
+  r_body += "<html>";
+  r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>";
 
-  if (request.indexOf("/set/") != -1) 
-    handleCommand(&request, &client);
- 
-  // Return the response
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: text/html");
-  client.println(""); //  do not forget this one
-  client.println("<!DOCTYPE HTML>");
-  client.println("<html>");
- 
 //ac
-  client.print("<h2>AC</h2> ");
-  
-  client.print("<p>status: ");
-  client.print(ac.isOn?"On":"Off");
-  client.print("<a href=\"/set/ac/on\"\"><button>on</button></a>");
-  client.print("<a href=\"/set/ac/off\"><button>off</button></a></p>");  
-  
-  client.print("<p>temp: ");
-  client.print(ac.temp);
-  client.print("<a href=\"/set/ac/temp/21\"\"><button>21</button></a>");
-  client.print("<a href=\"/set/ac/temp/22\"\"><button>22</button></a>");
-  client.print("<a href=\"/set/ac/temp/23\"\"><button>23</button></a>");
-  client.print("<a href=\"/set/ac/temp/24\"\"><button>24</button></a>");
-  client.print("<a href=\"/set/ac/temp/25\"\"><button>25</button></a>");
-  client.print("</p>");  
-  
-  client.print("<p>airflow: ");
-  client.print(ac.flow);
-  client.print("<a href=\"/set/ac/flow/0\"\"><button>min</button></a>");
-  client.print("<a href=\"/set/ac/flow/1\"\"><button>med</button></a>");
-  client.print("<a href=\"/set/ac/flow/2\"\"><button>max</button></a>");
-  client.print("</p>");  
+  r_body += "<h2>AC</h2> ";
+  r_body += "<p>status: ";
+  r_body += ac.isOn?"On":"Off";
+  r_body += "<a href=\"/set/ac/on\"\"><button>on</button></a>";
+  r_body += "<a href=\"/set/ac/off\"><button>off</button></a></p>";
+  r_body += "<p>temp: ";
+  r_body += String(ac.temp);
+  r_body += "<a href=\"/set/ac/temp/21\"\"><button>21</button></a>";
+  r_body += "<a href=\"/set/ac/temp/22\"\"><button>22</button></a>";
+  r_body += "<a href=\"/set/ac/temp/23\"\"><button>23</button></a>";
+  r_body += "<a href=\"/set/ac/temp/24\"\"><button>24</button></a>";
+  r_body += "<a href=\"/set/ac/temp/25\"\"><button>25</button></a>";
+  r_body += "</p>";
+  r_body += "<p>airflow: ";
+  r_body += String(ac.flow);
+  r_body += "<a href=\"/set/ac/flow/0\"\"><button>min</button></a>";
+  r_body += "<a href=\"/set/ac/flow/1\"\"><button>med</button></a>";
+  r_body += "<a href=\"/set/ac/flow/2\"\"><button>max</button></a>";
+  r_body += "</p>";
+  r_body += "<p>swing: ";
+  r_body += ac.swing?"On":"Off";
+  r_body += "<a href=\"/set/ac/swing/on\"\"><button>On</button></a>";
+  r_body += "<a href=\"/set/ac/swing/off\"><button>Off</button></a></p>";
 
-  client.print("<p>swing: ");
-  client.print(ac.swing?"On":"Off");
-  client.print("<a href=\"/set/ac/swing/on\"\"><button>On</button></a>");
-  client.print("<a href=\"/set/ac/swing/off\"><button>Off</button></a></p>");  
+  r_body += "<h2>Environment</h2>";
+  r_body += environment.isOn?"On":"Off";
+  r_body += "<br/>";
+  r_body += "temperature: ";
+  r_body += String(environment.temperature);
+  r_body += "&#176;<br/>";
+  r_body += "humidity: ";
+  r_body += String(environment.humidity);
+  r_body += "%<br/>";
+  r_body += "pressure: ";
+  r_body += String(environment.pressure);
+  r_body += "hPa<br/>";
 
-//environment
-  client.print("<h2>Environment</h2>");
-  client.print(environment.isOn?"On":"Off");
-  client.println("<br/>");
-  client.print("temperature: ");
-  client.print(environment.temperature);
-  client.println("&#176;<br/>");
-  client.print("humidity: ");
-  client.print(environment.humidity);
-  client.println("%<br/>");
-  client.print("pressure: ");
-  client.print(environment.pressure);
-  client.println("hPa<br/>");
-
-  client.println("</html>");
- 
-  delay(1);
-  Serial.println("Client disonnected");
-  Serial.println("");
-
-};
-
-void handleStatus(String *args, WiFiClient *client){
-  client->println("HTTP/1.1 200 OK");
-  client->println("Content-Type: application/json");
-  client->println(""); //  do not forget this one
-
-  bool _status = false;
-
-  //ac
-  if (args->indexOf("/status/ac") != -1)  
-    _status = ac.isOn;
-
-  //env sensor
-  if (args->indexOf("/status/env") != -1)  
-    _status = environment.isOn;
-
-  client->print("{\"statusPattern\": \""); 
-  client->print(_status?"true":"false"); 
-  client->println("\"}");
-  delay(1);
-
+  r_body += ("</body></html>");
+  return r_body;
 }
 
-void handleCommand(String *args, WiFiClient *client){
+String json_val(String name, String value){
+  return "\"" + name + "\": \"" + value + "\"";
+}
 
-  //air conditioner
-  if (args->indexOf("/set/ac/") != -1){
-    
-    // on/off
-    if (args->indexOf("/set/ac/on") != -1)      ac.turnOn();
-    if (args->indexOf("/set/ac/off") != -1)     ac.turnOff();
+String status_json(){
+  String r_body;
+  r_body += "{";
 
-    // temp
-    if (args->indexOf("/set/ac/temp/21") != -1) ac.setTemp(21);
-    if (args->indexOf("/set/ac/temp/22") != -1) ac.setTemp(22);
-    if (args->indexOf("/set/ac/temp/23") != -1) ac.setTemp(23);
-    if (args->indexOf("/set/ac/temp/24") != -1) ac.setTemp(24);
-    if (args->indexOf("/set/ac/temp/25") != -1) ac.setTemp(25);
+  // ac
+  r_body += "\"ac\":{";
+  r_body += json_val("power", ac.isOn?"1":"0") + ",";
+  r_body += json_val("temp", String(ac.temp)) + ",";
+  r_body += json_val("flow", String(ac.flow)) + ",";
+  r_body += json_val("swing", String(ac.swing?"1":"0"));
+  r_body += "},";
 
-    // airflow
-    if (args->indexOf("/set/ac/flow/0") != -1)  ac.setFlow(0);
-    if (args->indexOf("/set/ac/flow/1") != -1)  ac.setFlow(1);
-    if (args->indexOf("/set/ac/flow/2") != -1)  ac.setFlow(2);
+  // environment
+  r_body += "\"env\":{";
+  r_body += json_val("temp", String(environment.temperature)) + ",";
+  r_body += json_val("hum", String(environment.humidity)) + ",";
+  r_body += json_val("pres", String(environment.pressure));
+  r_body += "}";
 
-    // swing
-    if (args->indexOf("/set/ac/swing/on") != -1)  ac.swingOn();
-    if (args->indexOf("/set/ac/swing/off") != -1) ac.swingOff();
-
-  } 
-
+  r_body += "}";
+  return r_body;
 }
