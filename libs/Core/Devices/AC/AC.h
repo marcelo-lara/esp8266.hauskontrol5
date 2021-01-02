@@ -27,6 +27,17 @@ public:
     void swingOn();
     void swingOff();
 
+    // json
+    String to_json(){
+        return \
+        "{\
+            \"power\":\"" + String(this->isOn)  + "\", \
+            \"temp\":\""  + String(this->temp)  + "\", \
+            \"flow\":\""  + String(this->flow)  + "\", \
+            \"swing\":\"" + String(this->swing) + "\" \
+        }";
+    }
+
 private:
     int irOut;
 };

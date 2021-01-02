@@ -122,33 +122,18 @@ String ui_root(){
   r_body += String(environment.pressure);
   r_body += "hPa<br/>";
 
+  r_body += "<h2>api</h2>";
+  r_body += "<a href=\"/status\">status</a></p>";
+
   r_body += ("</body></html>");
   return r_body;
-}
-
-String json_val(String name, String value){
-  return "\"" + name + "\": \"" + value + "\"";
 }
 
 String status_json(){
   String r_body;
   r_body += "{";
-
-  // ac
-  r_body += "\"ac\":{";
-  r_body += json_val("power", ac.isOn?"1":"0") + ",";
-  r_body += json_val("temp", String(ac.temp)) + ",";
-  r_body += json_val("flow", String(ac.flow)) + ",";
-  r_body += json_val("swing", String(ac.swing?"1":"0"));
-  r_body += "},";
-
-  // environment
-  r_body += "\"env\":{";
-  r_body += json_val("temp", String(environment.temperature)) + ",";
-  r_body += json_val("hum", String(environment.humidity)) + ",";
-  r_body += json_val("pres", String(environment.pressure));
-  r_body += "}";
-
+  r_body += "\"ac\":" + ac.to_json() + ",";
+  r_body += "\"env\":"+ environment.to_json();
   r_body += "}";
   return r_body;
 }

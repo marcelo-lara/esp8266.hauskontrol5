@@ -16,6 +16,17 @@ public:
 
     bool isOn;
 
+    // json
+    String to_json(){
+        return \
+        "{\
+            \"temp\":\"" + String(this->temperature) + "\", \
+            \"hum\":\"" + String(this->humidity) + "\", \
+            \"pres\":\"" + String(this->pressure) + "\", \
+            \"light\":\"" + String(this->light) + "\" \
+        }";
+    }
+
 private:
     long lastUpdated;
 
