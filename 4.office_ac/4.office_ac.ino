@@ -11,8 +11,7 @@
 #define bme280_sda      4 // D2 SDA (bme280)
 #define wifiLedPin      2 // D4 builtIn led
 
-// WiFiServer server(80);
-ESP8266WebServer server(80);    // Create a webserver object that listens for HTTP request on port 80
+ESP8266WebServer server(80);    // WebServer object
 
 //helpers
 
