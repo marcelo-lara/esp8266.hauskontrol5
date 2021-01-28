@@ -7,10 +7,10 @@ IRsend irsend(14);  // An IR LED is controlled by GPIO pin 14 (D5)
 
 const unsigned int kAc_Type = 1; // 1: Wall
 unsigned int        ac_heat = 0; // 0: Cool | 1: Heat
-unsigned int    ac_power_on = 1; // 0: Off  | 1: On
+unsigned int    ac_power_on = 0; // 0: Off  | 1: On
 unsigned int ac_air_clean_state = 0; // 0 : off | 1 : on --> power on
-unsigned int ac_temperature = 24; // 18 ~ 30
-unsigned int ac_flow = 0; // 0: low | 2: high
+unsigned int ac_temperature = 23; // 18 ~ 30
+unsigned int ac_flow = 2; // 0: low | 2: high
 const uint8_t kAc_Flow_Tower[3] = {0, 4, 6};
 const uint8_t kAc_Flow_Wall[4] = {0, 2, 4, 5};    
 

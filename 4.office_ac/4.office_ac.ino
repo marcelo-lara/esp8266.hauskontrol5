@@ -34,6 +34,7 @@ void setup() {
   // web ui
   server.on("/",                []() { server.send(200, "text/html", ui_root()); return; });
   server.on("/status",          []() { server.send(200, "application/json", status_json()); return; });
+  server.on("/get/ac/on",       []() { server.send(200, "application/json", ac_status_json()); return; });
 
   // ac settings
   server.on("/set/ac/on",       []() { ac.turnOn();    return return_result(); });
@@ -134,5 +135,13 @@ String status_json(){
   r_body += "\"ac\":" + ac.to_json() + ",";
   r_body += "\"env\":"+ environment.to_json();
   r_body += "}";
+  return r_body;
+}
+
+String ac_status_json(){
+  String r_body;
+  r_body += "{\"statusPattern\":\"";
+  r_body += ac.isOn?"true":"false";
+  r_body += "\"}";
   return r_body;
 }
