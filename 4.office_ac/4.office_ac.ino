@@ -10,6 +10,8 @@
 #define bme280_scl      5 // D1 SCL (bme280)
 #define bme280_sda      4 // D2 SDA (bme280)
 #define wifiLedPin      2 // D4 builtIn led
+#define acOnSwitchPin  12 // D6 pullup 
+#define acOnLedPin     13 // D7
 
 ESP8266WebServer server(80);    // WebServer object
 
@@ -64,6 +66,10 @@ void setup() {
   Serial.print("http://");
   Serial.print(WiFi.localIP());
   Serial.println("/");
+
+  pinMode(acOnLedPin, OUTPUT);
+  digitalWrite(acOnLedPin, HIGH);
+
 
 }
 
