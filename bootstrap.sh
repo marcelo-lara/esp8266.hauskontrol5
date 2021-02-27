@@ -12,6 +12,7 @@ Nodes=(
     "2.office" 
     "3.suite"
     "4.office_ac"
+    "5.stage3"
 )
 
 # set folders

@@ -1,10 +1,12 @@
 #pragma once
 #include "Arduino.h"
+#include "../../Io/ShiftedIo/ShiftedIo.h"
 typedef void FanStatusChanged(int outSpeed);
 
 class Fan {
 public:
     Fan(int _pin1,int _pin2,int _pin3,int _pin4, int defaultSpeed);
+    Fan(ShiftedIo _shiftedOut, int defaultSpeed);
     void turnOn();
     void turnOff();
     void toggle();
@@ -12,6 +14,7 @@ public:
 
     bool isOn;
     int  speed;
+    
 private:
     int pin1;
     int pin2;
