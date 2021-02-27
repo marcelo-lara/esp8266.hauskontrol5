@@ -4,8 +4,6 @@
 
 /////////////////////////////////////////
 // Hardware Setup
-#define wifiLedPin      2 // D4 builtIn led
-#define statusLedPin    2 // D4 Wall StatusLed
 
 //shifted out
 #define latchPin 13 // D7 violet
@@ -20,29 +18,13 @@ ShiftedIo shiftedIo(latchPin, dataPin, clockPin, true);
 
 #include <ESP8266WebServer.h> // web server
 ESP8266WebServer server(80);    
-#define HTTP_OK  server.send(200, "text/plain", "OK")
-#define HTTP_404 server.send(404, "text/plain", "404: Not found")
-
 
 void setup() {
-  Serial.begin(250000);
-  pinMode(statusLedPin, OUTPUT);
-  digitalWrite(statusLedPin, LOW);
-
-  //core devices
-
   //connect
   wemosWiFi.connect("stage3");
 
   // web ui
-  server.on("/",                []() { server.send(200, "text/html", ui_root()); return; });
-  server.on("/status",          []() { server.send(200, "application/json", status_json()); return; });
-
-  server.onNotFound([](){HTTP_404;});  
-  server.begin();
-
-  //non-critical hardware
-  analogWrite(statusLedPin, 50);
+  server_setup();
 
 }
  
@@ -51,10 +33,25 @@ void loop() {
   server.handleClient();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define HTTP_OK  server.send(200, "text/plain", "OK")
+#define HTTP_404 server.send(404, "text/plain", "404: Not found")
+void server_setup(){
+
+  //handles
+  server.on("/",                []() { server.send(200, "text/html", ui_root()); return; });
+  server.on("/status",          []() { server.send(200, "application/json", status_json()); return; });
+
+  //undhandleds
+  server.onNotFound([](){HTTP_404;});  
+  server.begin();
+
+}
+
 String ui_root(){
   String r_body;
   r_body += "<html>";
-  r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>";
+  r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title></title></head><body>";
   r_body += ("</body></html>");
   return r_body;
 }
