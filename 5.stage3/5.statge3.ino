@@ -6,14 +6,16 @@
 // Hardware Setup
 
 //shifted out
+#include "src/Core/Io/ShiftedIo/ShiftedIo.h"
 #define latchPin 13 // D7 violet
 #define dataPin  12 // D6 blue
 #define clockPin 14 // D5 clock
-#include "src/Core/Io/ShiftedIo/ShiftedIo.h"
 ShiftedIo shiftedIo(latchPin, dataPin, clockPin, true);
 
 //fan
+#include "src/Core/Devices/Fan/Fan.h"
 #define defSpeed           3 // default speed
+Fan fan(&shiftedIo, defSpeed); // suite fan
 ///////////////////////////////////////////
 
 #include <ESP8266WebServer.h> // web server
@@ -31,6 +33,13 @@ void setup() {
 void loop() {
   wemosWiFi.update();
   server.handleClient();
+
+  for (int i = 0; i < 5; i++)
+  {
+    fan.setSpeed(i);
+    delay(1000);
+  }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

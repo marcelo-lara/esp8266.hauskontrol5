@@ -1,40 +1,69 @@
 #include "Fan.h"
 
-Fan::Fan(int _pin1,int _pin2,int _pin3,int _pin4, int defaultSpeed){
+Fan::Fan(int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed){
     pin1=_pin1; pinMode(pin1, OUTPUT); digitalWrite(pin1, 0);
     pin2=_pin2; pinMode(pin2, OUTPUT); digitalWrite(pin2, 0);
     pin3=_pin3; pinMode(pin3, OUTPUT); digitalWrite(pin3, 0);
     pin4=_pin4; pinMode(pin4, OUTPUT); digitalWrite(pin4, 0);
-    onSpeed=defaultSpeed;
+    onSpeed=_defaultSpeed;
+};
+Fan::Fan(ShiftedIo *_shiftedOut, int _defaultSpeed){
+    this->shiftedOut = _shiftedOut;
+    this->isShiftedOut = true;
+    this->onSpeed=_defaultSpeed;
 };
 
 void Fan::turnOn(){
-    setOutput(onSpeed);
+    speed=onSpeed;
+    this->render();
 };
 void Fan::turnOff(){
-    setOutput(0);
+    speed=0;
+    this->render();
 };
 void Fan::toggle(){
     if(isOn) turnOff();
     else     turnOn();
 };
 void Fan::setSpeed(int _speed){
-    setOutput(_speed);
+    speed = _speed;
+    onSpeed = _speed;
+    this->render();
+};
+int Fan::getSpeed(){
+    return this->onSpeed;
 };
 
-void Fan::setOutput(int fanSpeed){
-    speed=fanSpeed;
-    isOn=fanSpeed>0;
-    if(isOn) onSpeed=fanSpeed;
-    Serial.printf("fanOut: %i\n", fanSpeed);
-    switch (fanSpeed)
-    {
-    case 0: digitalWrite(pin1, 0); digitalWrite(pin2, 0); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
-    case 1: digitalWrite(pin1, 1); digitalWrite(pin2, 0); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
-    case 2: digitalWrite(pin1, 1); digitalWrite(pin2, 1); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
-    case 3: digitalWrite(pin1, 1); digitalWrite(pin2, 1); digitalWrite(pin3, 1); digitalWrite(pin4, 0); break;
-    case 4: digitalWrite(pin1, 1); digitalWrite(pin2, 1); digitalWrite(pin3, 1); digitalWrite(pin4, 1); break;
-    default:
-        break;
-    }
+
+///////////////////////////////////////////////////////////////////
+// Hardware IO
+void Fan::render(){
+
+    isOn=speed>0;
+    Serial.printf("render: %i\n", speed);
+
+    if(isShiftedOut)
+        render_shifted();
+    else
+        render_direct();
+};
+
+void Fan::render_direct(){
+    Serial.printf("\tdirect: %i\n", speed);
+    switch (speed){
+        case 0: digitalWrite(pin1, 0); digitalWrite(pin2, 0); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
+        case 1: digitalWrite(pin1, 1); digitalWrite(pin2, 0); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
+        case 2: digitalWrite(pin1, 1); digitalWrite(pin2, 1); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
+        case 3: digitalWrite(pin1, 1); digitalWrite(pin2, 1); digitalWrite(pin3, 1); digitalWrite(pin4, 0); break;
+        case 4: digitalWrite(pin1, 1); digitalWrite(pin2, 1); digitalWrite(pin3, 1); digitalWrite(pin4, 1); break;
+    };
+};
+void Fan::render_shifted(){
+    Serial.printf("\tshifted: %i\n", speed);
+    for (int i = 0; i < 4; i++)
+        this->shiftedOut->setIo(i, speed>i, true);
+
+    this->shiftedOut->render();
+
+
 };

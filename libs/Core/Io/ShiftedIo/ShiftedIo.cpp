@@ -22,6 +22,10 @@ ShiftedIo::ShiftedIo(int _latchPin, int _dataPin, int _clockPin, bool _invertedO
 };
 
 void ShiftedIo::setIo(int _out, bool _state){
+  this->setIo(_out, _state, false);
+};
+
+void ShiftedIo::setIo(int _out, bool _state, bool _hold_render){
   if(__invertedOut)
     _state = !_state;
 
@@ -31,7 +35,8 @@ void ShiftedIo::setIo(int _out, bool _state){
     bitClear(__registerOutput, _out);
   }
   
-  this->render();
+  if(!_hold_render)
+    this->render();
 };
 bool ShiftedIo::getIo(int _out){
 
@@ -52,4 +57,7 @@ void ShiftedIo::render(){
     digitalWrite(__latchPin, LOW);
     shiftOut(__dataPin, __clockPin, MSBFIRST, this->__registerOutput);
     digitalWrite(__latchPin, HIGH);
+
+    Serial.printf("\tshift_render: %i\n", __registerOutput);
+
 };

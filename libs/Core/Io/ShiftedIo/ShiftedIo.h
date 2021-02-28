@@ -7,8 +7,10 @@ public:
     ShiftedIo(int _latchPin, int _dataPin, int _clockPin, bool _invertedOut);
     
     void setIo(int _out, bool _state);
+    void setIo(int _out, bool _state, bool _hold_render);
     bool getIo(int _out);
     void toggleIo(int _out);
+    void render();
 
 
 private:
@@ -16,6 +18,5 @@ private:
     int __dataPin;
     int __clockPin;
     bool __invertedOut;
-    void render();
     int __registerOutput;
 };
