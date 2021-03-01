@@ -61,6 +61,7 @@ void server_setup(){
   //light
   server.on("/get/light",         []() { return server.send(200, "application/json", status_pattern(shiftedIo.getIo(fan_light))); });
   server.on("/set/light/on",      []() { shiftedIo.setIo(fan_light, true); return HTTP_OK; });
+  server.on("/set/light/toggle",  []() { shiftedIo.toggleIo(fan_light); return HTTP_OK; });
   server.on("/set/light/off",     []() { shiftedIo.setIo(fan_light, false); return HTTP_OK; });
 
   //undhandleds
@@ -73,7 +74,27 @@ String ui_root(){
   String r_body;
   r_body += "<html>";
   r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title></title></head><body>";
-  r_body += ("</body></html>");
+  r_body += "<h1>Stage3</h1>";
+ 
+  r_body += "<h2>light</h2>";
+  r_body += "<span>";
+  r_body += shiftedIo.getIo(fan_light)?"On":"Off";
+  r_body += "</span>";
+  r_body += "<a href=\"/set/light/toggle\" target=\"i_result\"><button>switch</button></a><br>";
+
+  r_body += "<h2>fan</h2>";
+  r_body += "<span>";
+  r_body += fan.isOn?"On":"Off";
+  r_body += "</span>";
+  r_body += " <a href=\"/set/fan/off\" target=\"i_result\"><button>off</button></a>\
+              <a href=\"/set/fan/speed/1\" target=\"i_result\"><button>1</button></a>\
+              <a href=\"/set/fan/speed/2\" target=\"i_result\"><button>2</button></a>\
+              <a href=\"/set/fan/speed/3\" target=\"i_result\"><button>3</button></a>\
+              <a href=\"/set/fan/speed/4\" target=\"i_result\"><button>3</button></a>\
+              <a href=\"/set/fan/speed/5\" target=\"i_result\"><button>4</button></a>";
+  r_body += "<iframe name=\"i_result\" height=\"20px\" width=\"100%\" style=\"display:none\"></iframe>";
+
+  r_body += "</body></html>";
   return r_body;
 }
 

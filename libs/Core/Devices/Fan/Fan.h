@@ -11,11 +11,10 @@ public:
     void turnOff();
     void toggle();
     void setSpeed(int _speed);
-    int  getSpeed();
+    int  speed;
     bool isOn;
 
 private:
-    int  speed;
     int  onSpeed;
     void render();
 

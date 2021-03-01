@@ -19,7 +19,8 @@
 #define defSpeed           3 // default speed
 ///////////////////////////////////////////
 
-WiFiServer server(80);
+#include <ESP8266WebServer.h> // web server
+ESP8266WebServer server(80);    
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
@@ -45,16 +46,11 @@ void setup() {
   light.turnOff();
 
   // Start the server
-  server.begin();
+  server_setup();
  
   //non-critical hardware
   analogWrite(statusLedPin, 50);
 
-  // Print the IP address
-  Serial.print("Use this URL to connect: ");
-  Serial.print("http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("/");
  
 }
  
@@ -62,63 +58,76 @@ void loop() {
   wemosWiFi.update();
 
   wallSwitch.update();
-  handleConnection();
+  server.handleClient();
 
  
 }
 
-long _req_timeout;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define HTTP_OK  server.send(200, "text/plain", "OK")
+#define HTTP_404 server.send(404, "text/plain", "404: Not found")
+void server_setup(){
 
-void handleConnection(){
-  // Check if a client has connected
-  WiFiClient client = server.available();
-  if (!client) return;
-  Serial.print("has client..");
- 
-  // Wait until the client sends some data
-  _req_timeout = millis() + 500;
-  while(!client.available() || millis()<_req_timeout){delay(1);}
-  Serial.print("connection received..");
+  //core
+  server.on("/",                  []() { server.send(200, "text/html", ui_root()); return; });
+  server.on("/status",            []() { server.send(200, "application/json", status_pattern(fan.isOn)); return; });
 
-  // Read the first line of the request
-  String request = client.readStringUntil('\r');
-  Serial.print("request> ");
-  Serial.println(request);
-  client.flush();
-
-  // match status
-  if (request.indexOf("/status/") != -1) handleStatus(&request, &client);
-
-  // Match the request
+  //fan
+  server.on("/get/fan",           []() { return server.send(200, "application/json", status_pattern(fan.isOn));});
+  server.on("/set/fan/on",        []() { fan.turnOn();    return HTTP_OK; });
+  server.on("/set/fan/off",       []() { fan.turnOff();   return HTTP_OK; });
+  server.on("/set/fan/speed/1",   []() { fan.setSpeed(1); return HTTP_OK; });
+  server.on("/set/fan/speed/2",   []() { fan.setSpeed(2); return HTTP_OK; });
+  server.on("/set/fan/speed/3",   []() { fan.setSpeed(3); return HTTP_OK; });
+  server.on("/set/fan/speed/4",   []() { fan.setSpeed(4); return HTTP_OK; });
 
   //light
-  if (request.indexOf("/set/light/") != -1) handleLight(&request);
- 
-  //fan
-  if (request.indexOf("/set/fan/") != -1) handleFan(&request);
+  server.on("/get/light",         []() { return server.send(200, "application/json", status_pattern(light.isOn)); });
+  server.on("/set/light/on",      []() { light.turnOn();  return HTTP_OK; });
+  server.on("/set/light/off",     []() { light.turnOff(); return HTTP_OK; });
+  server.on("/set/light/toggle",  []() { light.toggle();  return HTTP_OK; });
 
-  // Return the response
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: text/html");
-  client.println(""); //  do not forget this one
-  client.println("<!DOCTYPE HTML>");
-  client.println("<html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body>");
-  client.printf("<h1>%s</h1>","suite" );
+  //undhandleds
+  server.onNotFound([](){HTTP_404;});  
+  server.begin();
+}
+
+String ui_root(){
+  String r_body;
+  r_body += "<html>";
+  r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title></title></head><body>";
+  r_body += "<h1>Suite</h1>";
  
-  client.printf("light: %s <a href=\"/set/light/1/toggle\"\"><button>switch</button></a><br>", (light.isOn?"On":"Off") );
-  client.printf("fan:   %i \
-    <a href=\"/set/fan/off\"\"><button>off</button></a>\
-    <a href=\"/set/fan/speed/1\"\"><button>1</button></a>\
-    <a href=\"/set/fan/speed/2\"\"><button>2</button></a>\
-    <a href=\"/set/fan/speed/3\"\"><button>3</button></a>\
-    <a href=\"/set/fan/speed/4\"\"><button>4</button></a>\
-    <a href=\"/set/fan/on\"\"><button>on</button></a>\
-    <br>", (fan.speed) );
-  client.println("</body></html>");
-  client.println(""); //  do not forget this one
- 
-  delay(1);
-};
+  r_body += "<h2>light</h2>";
+  r_body += "<span>";
+  r_body += light.isOn?"On":"Off";
+  r_body += "</span>";
+  r_body += "<a href=\"/set/light/toggle\" target=\"i_result\"><button>switch</button></a><br>";
+
+  r_body += "<h2>fan</h2>";
+  r_body += "<span>";
+  r_body += fan.isOn?"On":"Off";
+  r_body += "</span>";
+  r_body += "<a href=\"/set/fan/off\" target=\"i_result\"><button>off</button></a>\
+    <a href=\"/set/fan/speed/1\" target=\"i_result\"><button>1</button></a>\
+    <a href=\"/set/fan/speed/2\" target=\"i_result\"><button>2</button></a>\
+    <a href=\"/set/fan/speed/3\" target=\"i_result\"><button>3</button></a>\
+    <a href=\"/set/fan/speed/4\" target=\"i_result\"><button>4</button></a>";
+  r_body += "<iframe name=\"i_result\" height=\"20px\" width=\"100%\" style=\"display:none\"></iframe>";
+
+  r_body += "</body></html>";
+  return r_body;
+}
+
+String status_pattern(bool state){
+  String r_body;
+  r_body += "{\"statusPattern\":\"";
+  r_body += state?"true":"false";
+  r_body += "\"}";
+  return r_body;
+}
+
+/////////////////////////////////////////////////////////////
 
 void handleStatus(String *args, WiFiClient *client){
   client->println("HTTP/1.1 200 OK");

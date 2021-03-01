@@ -49,8 +49,7 @@ bool ShiftedIo::getIo(int _out){
 
 };
 void ShiftedIo::toggleIo(int _out){
-  bool val = bitRead(__registerOutput, _out) == 1;
-  this->setIo(_out, !val);
+  this->setIo(_out, !this->getIo(_out));
 };
 
 void ShiftedIo::render(){

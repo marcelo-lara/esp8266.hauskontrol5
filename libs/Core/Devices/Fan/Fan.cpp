@@ -30,9 +30,6 @@ void Fan::setSpeed(int _speed){
     onSpeed = _speed;
     this->render();
 };
-int Fan::getSpeed(){
-    return this->onSpeed;
-};
 
 
 ///////////////////////////////////////////////////////////////////
