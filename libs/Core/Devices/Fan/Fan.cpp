@@ -40,7 +40,7 @@ int Fan::getSpeed(){
 void Fan::render(){
 
     isOn=speed>0;
-    Serial.printf("render: %i\n", speed);
+    Serial.printf("set_fan: %i\n", speed);
 
     if(isShiftedOut)
         render_shifted();
@@ -49,7 +49,6 @@ void Fan::render(){
 };
 
 void Fan::render_direct(){
-    Serial.printf("\tdirect: %i\n", speed);
     switch (speed){
         case 0: digitalWrite(pin1, 0); digitalWrite(pin2, 0); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
         case 1: digitalWrite(pin1, 1); digitalWrite(pin2, 0); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
@@ -59,8 +58,7 @@ void Fan::render_direct(){
     };
 };
 void Fan::render_shifted(){
-    Serial.printf("\tshifted: %i\n", speed);
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 5; i++)
         this->shiftedOut->setIo(i, speed>i, true);
 
     this->shiftedOut->render();

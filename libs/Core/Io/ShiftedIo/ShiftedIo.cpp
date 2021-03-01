@@ -58,6 +58,7 @@ void ShiftedIo::render(){
     shiftOut(__dataPin, __clockPin, MSBFIRST, this->__registerOutput);
     digitalWrite(__latchPin, HIGH);
 
-    Serial.printf("\tshift_render: %i\n", __registerOutput);
+    Serial.print("\tshift_render: 0x");
+    Serial.println(__registerOutput, BIN);
 
 };
