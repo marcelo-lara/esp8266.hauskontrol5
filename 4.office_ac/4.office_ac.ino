@@ -15,15 +15,12 @@
 
 ESP8266WebServer server(80);    // WebServer object
 
-//helpers
-
-
+//// devices ////
 #include "src/Core/Devices/AC/AC.h"
 AC ac(irSendPin, 24);
 
 #include "src/Core/Devices/Environment/Environment.h"
 Environment environment;
-
 
 void setup() {
 
@@ -35,7 +32,9 @@ void setup() {
 
   // web ui
   server.on("/",                []() { server.send(200, "text/html", ui_root()); return; });
-  server.on("/status",          []() { server.send(200, "application/json", status_json()); return; });
+  server.on("/status",          []() { 
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "application/json", status_json()); return; });
   server.on("/get/ac/on",       []() { server.send(200, "application/json", ac_status_json()); return; });
 
   // ac settings
@@ -55,7 +54,17 @@ void setup() {
   server.on("/set/ac/swing/on", []() { ac.swingOn();   return return_result(); });
   server.on("/set/ac/swing/off",[]() { ac.swingOff();  return return_result(); });
 
-  server.onNotFound([](){server.send(404, "text/plain", "404: Not found");});  
+  server.onNotFound([](){
+    if (server.method() == HTTP_OPTIONS){
+        server.sendHeader("Access-Control-Allow-Origin", "*");
+        server.sendHeader("Access-Control-Max-Age", "10000");
+        server.sendHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
+        server.sendHeader("Access-Control-Allow-Headers", "*");
+        server.send(204);
+    }else{
+        server.send(404, "text/plain", "");
+    }
+  });  
   server.begin();
   
   //non-critical hardware
