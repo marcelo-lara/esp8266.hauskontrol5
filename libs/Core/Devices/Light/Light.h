@@ -11,6 +11,12 @@ public:
     void toggle();
 
     bool isOn;
+
+    // json
+    String to_json(){
+        return "\"light\":\"" + String(this->isOn?"1":"0") + "\"";
+    }
+
 private:
     int pin;
     bool OnIsLow;
