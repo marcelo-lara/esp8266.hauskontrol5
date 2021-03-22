@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>   // Include the WebServer library
+#include <uri/UriRegex.h>
 #include "src/wemos.setup/wemos.setup.h"
 
 /////////////////////////////////////////
@@ -12,8 +14,9 @@
 #define bme280_sda      4 // D2 SDA (bme280)
 #define wifiLedPin      2 // D4 builtIn led
 
-WiFiServer server(80);
+ESP8266WebServer server(80);    // WebServer object
 
+//// devices ////
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
 
@@ -40,7 +43,7 @@ void setup() {
   light.turnOff();
 
   // Start the server
-  server.begin();
+  server_setup();
  
   //non-critical hardware
   environment.setup();
@@ -55,98 +58,79 @@ void setup() {
 }
  
 void loop() {
-  wemosWiFi.update();
-
   wallSwitch.update();
   environment.update();
-  handleConnection();
 
- 
+  //
+  wemosWiFi.update();
+  server.handleClient();
+
 }
 
-void handleConnection(){
-  // Check if a client has connected
-  WiFiClient client = server.available();
-  if (!client) return;
- 
-  // Wait until the client sends some data
-  Serial.println("new client");
-  while(!client.available()){delay(1);}
- 
-  // Read the first line of the request
-  String request = client.readStringUntil('\r');
-  Serial.println(request);
-  client.flush();
- 
-  if (request.indexOf("/status/") != -1) 
-    return handleStatus(&request, &client);
+void server_setup(){
+  // node
+  server.on("/",                []() { server.send(200, "text/html", ui_root()); return; });
+  server.on("/status",          []() { 
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "application/json", status_json()); return; }
+  );
 
-  if (request.indexOf("/set/") != -1) 
-    handleCommand(&request, &client);
- 
-  // Return the response
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: text/html");
-  client.println(""); //  do not forget this one
-  client.println("<!DOCTYPE HTML>");
-  client.println("<html>");
- 
-  client.print("<h2>light</h2>");
-  client.print(light.isOn?"On":"Off");
-  client.println("<a href=\"/set/light/on\"\"><button>Turn On </button></a>");
-  client.println("<a href=\"/set/light/off\"> <button>Turn Off </button></a><br />");  
+  // light
+  server.on("/set/light/on",       []() { light.turnOn();    return return_result(); });
+  server.on("/set/light/off",      []() { light.turnOff();   return return_result(); });
+  server.on("/set/light/toggle",   []() { light.toggle();   return return_result(); });
+  server.on("/status/light",       []() { return server.send(200, "application/json", status_pattern(light.isOn)); });
 
-//environment
-  client.print("<h2>Environment</h2>");
-  client.print(environment.isOn?"On":"Off");
-  client.println("<br/>");
-  client.print("temperature:");
-  client.print(environment.temperature);
-  client.println("<br/>");
-  client.print("humidity:");
-  client.print(environment.humidity);
-  client.println("<br/>");
-  client.print("pressure:");
-  client.print(environment.pressure);
-  client.println("<br/>");
-  
-  
+  //server
+  server.onNotFound([](){
+    if (server.method() == HTTP_OPTIONS){
+        server.sendHeader("Access-Control-Allow-Origin", "*");
+        server.sendHeader("Access-Control-Max-Age", "10000");
+        server.sendHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
+        server.sendHeader("Access-Control-Allow-Headers", "*");
+        server.send(204);
+    }else{
+        server.send(404, "text/plain", "");
+    }
+  });  
+  server.begin();
+}
 
-  client.println("</html>");
- 
-  delay(1);
-  Serial.println("Client disonnected");
-  Serial.println("");
-
-};
-
-void handleStatus(String *args, WiFiClient *client){
-  client->println("HTTP/1.1 200 OK");
-  client->println("Content-Type: application/json");
-  client->println(""); //  do not forget this one
-  bool _status = false;
+String ui_root(){
+  String r_body;
+  r_body += "<html>";
+  r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>";
 
   //light
-  if (args->indexOf("/status/light") != -1) 
-    _status = light.isOn;
+  r_body += "<h2>light</h2>";
+  r_body += "<span>";
+  r_body += light.isOn?"On":"Off";
+  r_body += "</span>";
+  r_body += "<a href=\"/set/light/toggle\" target=\"i_result\"><button>switch</button></a><br>";
 
-  //env sensor
-  if (args->indexOf("/status/env") != -1)  
-    _status = environment.isOn;
-
-  client->print("{\"statusPattern\": \""); 
-  client->print(_status?"true":"false"); 
-  client->println("\"}");
-
+  r_body += ("</body></html>");
+  return r_body;
 }
 
-void handleCommand(String *args, WiFiClient *client){
-
-  //light
-  if (args->indexOf("/set/light/") != -1){
-    if (args->indexOf("/set/light/on") != -1) light.turnOn();
-    if (args->indexOf("/set/light/off") != -1) light.turnOff();
-    if (args->indexOf("/set/light/toggle") != -1) light.toggle();
-  } 
-
+String status_json(){
+  String r_body;
+  r_body += "{";
+  r_body += light.to_json() +",";
+  r_body += "\"env\":" + environment.to_json();
+  r_body += "}";
+  return r_body;
 }
+
+String status_pattern(bool state){
+  String r_body;
+  r_body += "{\"statusPattern\":\"";
+  r_body += state?"true":"false";
+  r_body += "\"}";
+  return r_body;
+}
+
+void return_result(){
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.send(200, "application/json", "{\"result\":\"ok\"}"); // Send 
+}
+
