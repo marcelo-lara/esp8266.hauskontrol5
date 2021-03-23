@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include "wemos.setup.h"
+#include <ESP8266WebServer.h>   // Include the WebServer library
+#include <uri/UriRegex.h>
+#include "src/Core/Web/WebServerHelper.h"
+#include "src/wemos.setup/wemos.setup.h"
 
 /////////////////////////////////////////
 // Hardware Setup
@@ -12,7 +15,8 @@
 #define out3           12 // D6
 #define out4           13 // D7
 
-WiFiServer server(80);
+ESP8266WebServer server(80);    // WebServer object
+WebServerHelper srv(&server);
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
@@ -22,7 +26,7 @@ Light light[] = {
   Light(out1, false), // main
   Light(out2, false), // dicro
   Light(out3, false), // bookshelf
-  Light(out4, false) // corner
+  Light(out4, false)  // corner
 };
 
 void setup() {
@@ -35,94 +39,82 @@ void setup() {
   light[0].turnOn();
 
   //connect
-  wemosWiFi.connect("living");
+  wemosWiFi.connect("dummy");
   light[0].turnOff();
 
-  // Start the server
-  server.begin();
+  // WebServer
+  server_setup();
  
   //non-critical hardware
   analogWrite(statusLedPin, 50);
-
-  // Print the IP address
-  Serial.print("Use this URL to connect: ");
-  Serial.print("http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("/");
  
 }
  
 void loop() {
   wemosWiFi.update();
-
+  server.handleClient();
   wallSwitch.update();
-  handleConnection();
-
- 
 }
 
-void handleConnection(){
-  // Check if a client has connected
-  WiFiClient client = server.available();
-  if (!client) return;
- 
-  // Wait until the client sends some data
-  Serial.println("new client");
-  while(!client.available()){delay(1);}
- 
-  // Read the first line of the request
-  String request = client.readStringUntil('\r');
-  Serial.println(request);
-  client.flush();
- 
-  // Match the request
-  if (request.indexOf("/status/") != -1)
-    return replyStatus(&client, &request);
+void server_setup(){
+  // node
+  server.on("/",                []() { return ui_root();});
+  server.on("/status",          []() { return status_json();});
 
-  if (request.indexOf("/set/1/on") != -1)     light[0].turnOn();
-  if (request.indexOf("/set/1/off") != -1)    light[0].turnOff();
-  if (request.indexOf("/set/1/toggle") != -1) light[0].toggle();
- 
-  if (request.indexOf("/set/2/on") != -1)     light[1].turnOn();
-  if (request.indexOf("/set/2/off") != -1)    light[1].turnOff();
-  if (request.indexOf("/set/2/toggle") != -1) light[1].toggle();
- 
-  if (request.indexOf("/set/3/on") != -1)     light[2].turnOn();
-  if (request.indexOf("/set/3/off") != -1)    light[2].turnOff();
-  if (request.indexOf("/set/3/toggle") != -1) light[2].toggle();
- 
-  if (request.indexOf("/set/4/on") != -1)     light[3].turnOn();
-  if (request.indexOf("/set/4/off") != -1)    light[3].turnOff();
-  if (request.indexOf("/set/4/toggle") != -1) light[3].toggle();
- 
- 
-  // Return the response
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: text/html");
-  client.println(""); //  do not forget this one
-  client.println("<!DOCTYPE HTML>");
-  client.println("<html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body>");
-  for (size_t i = 0; i < 4; i++)
-    client.printf("io %i: %s <a href=\"/set/%i/toggle\"\"><button>switch</button></a><br>", i, (light[i].isOn?"On":"Off"), i );
-  client.println("</body></html>");
- 
-  delay(1);
-  Serial.println("Client disonnected");
-  Serial.println("");
+  // siri response
+  server.on("/pattern/light/1", []() { return srv.status_pattern(light[0].isOn); });
+  server.on("/pattern/light/2", []() { return srv.status_pattern(light[1].isOn); });
+  server.on("/pattern/light/3", []() { return srv.status_pattern(light[2].isOn); });
+  server.on("/pattern/light/4", []() { return srv.status_pattern(light[3].isOn); });
 
-};
+  // lights
+  server.on("/set/light/1/on",     []() { light[0].turnOn();  return srv.send_result("ok"); });
+  server.on("/set/light/1/off",    []() { light[0].turnOff(); return srv.send_result("ok"); });
+  server.on("/set/light/1/toggle", []() { light[0].toggle();  return srv.send_result("ok"); });
+  server.on("/set/light/2/on",     []() { light[1].turnOn();  return srv.send_result("ok"); });
+  server.on("/set/light/2/off",    []() { light[1].turnOff(); return srv.send_result("ok"); });
+  server.on("/set/light/2/toggle", []() { light[1].toggle();  return srv.send_result("ok"); });
+  server.on("/set/light/3/on",     []() { light[2].turnOn();  return srv.send_result("ok"); });
+  server.on("/set/light/3/off",    []() { light[2].turnOff(); return srv.send_result("ok"); });
+  server.on("/set/light/3/toggle", []() { light[2].toggle();  return srv.send_result("ok"); });
+  server.on("/set/light/4/on",     []() { light[3].turnOn();  return srv.send_result("ok"); });
+  server.on("/set/light/4/off",    []() { light[3].turnOff(); return srv.send_result("ok"); });
+  server.on("/set/light/4/toggle", []() { light[3].toggle();  return srv.send_result("ok"); });
 
-void replyStatus(WiFiClient *cl, String *req){
+  //server
+  srv.init();
+
+  // Print IP address
+  Serial.print("Use this URL to connect: ");
+  Serial.print("http://");
+  Serial.print(WiFi.localIP());
+  Serial.println("/");
+}
+
+
+void ui_root(){
+  String dev_html;
+  dev_html += "<h2>light</h2>";
+
+  //lights
+  for (int i = 0; i < 4; i++){
+    dev_html += "<div";
+    dev_html += " class=\"button " + String(light[i].isOn?"on":"off") + "\"";
+    dev_html += " target=\"set/light/" + String(i+1) + "/toggle\"";
+    dev_html += ">";
+    dev_html += "light "+ String(i+1);
+    dev_html += "</div>";
+  }
+
+  return srv.send_root(dev_html);
+}
+
+void status_json(){
+  String json_dev_list;
+  for (int i = 0; i < 4; i++)
+    json_dev_list += light[i].to_json() + String( i<3?",":"");
   
-  int st_from = req->indexOf("/status/") + 8;
-  int pos = req->substring(st_from, st_from+1).toInt()-1;
-
-  cl->println("HTTP/1.1 200 OK");
-  cl->println("Content-Type: application/json");
-  cl->println(""); 
-  cl->print("{\"statusPattern\": \""); 
-  cl->print(light[pos].isOn?"true":"false"); 
-  cl->println("\"}");
+  srv.send_status(json_dev_list);
 }
 
 void switchCallback(int clicks) {
@@ -134,6 +126,7 @@ void switchCallback(int clicks) {
   case -1:
     turnAllOff();
     break;
+
   case 1:
     if(light[0].isOn){
       turnAllOff();
