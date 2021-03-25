@@ -5,11 +5,14 @@ Light::Light(int _pin){
     pinMode(pin, OUTPUT);
 };
 Light::Light(int _pin, bool invertOnStatus){
-    pin=_pin;
-    pinMode(pin, OUTPUT);
-    OnIsLow=invertOnStatus;
+    Light("light", _pin, invertOnStatus);
 };
-
+Light::Light(String _name, int _pin, bool invertOnStatus){
+    pinMode(pin, OUTPUT);
+    name=_name;
+    pin=_pin;
+    OnIsLow=invertOnStatus;
+}
 
 void Light::turnOn(){
     setOutput(true);

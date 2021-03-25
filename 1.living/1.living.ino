@@ -15,6 +15,7 @@
 #define out3           12 // D6
 #define out4           13 // D7
 
+#define NODE_NAME "living"
 ESP8266WebServer server(80);    // WebServer object
 WebServerHelper srv(&server);
 
@@ -23,10 +24,10 @@ Button wallSwitch(wallSwitchPin);
 
 #include "src/Core/Devices/Light/Light.h"
 Light light[] = {
-  Light(out1, false), // main
-  Light(out2, false), // dicro
-  Light(out3, false), // bookshelf
-  Light(out4, false)  // corner
+  Light("main", out1, false), // main
+  Light("dicro", out2, false), // dicro
+  Light("bookshelf", out3, false), // bookshelf
+  Light("corner", out4, false)  // corner
 };
 
 void setup() {
@@ -39,7 +40,7 @@ void setup() {
   light[0].turnOn();
 
   //connect
-  wemosWiFi.connect("dummy");
+  wemosWiFi.connect(NODE_NAME);
   light[0].turnOff();
 
   // WebServer
@@ -61,62 +62,32 @@ void server_setup(){
   server.on("/",                []() { return ui_root();});
   server.on("/status",          []() { return status_json();});
 
-  // siri response
-  server.on("/pattern/light/1", []() { return srv.status_pattern(light[0].isOn); });
-  server.on("/pattern/light/2", []() { return srv.status_pattern(light[1].isOn); });
-  server.on("/pattern/light/3", []() { return srv.status_pattern(light[2].isOn); });
-  server.on("/pattern/light/4", []() { return srv.status_pattern(light[3].isOn); });
-
   // lights
-  server.on("/set/light/1/on",     []() { light[0].turnOn();  return srv.send_result("ok"); });
-  server.on("/set/light/1/off",    []() { light[0].turnOff(); return srv.send_result("ok"); });
-  server.on("/set/light/1/toggle", []() { light[0].toggle();  return srv.send_result("ok"); });
-  server.on("/set/light/2/on",     []() { light[1].turnOn();  return srv.send_result("ok"); });
-  server.on("/set/light/2/off",    []() { light[1].turnOff(); return srv.send_result("ok"); });
-  server.on("/set/light/2/toggle", []() { light[1].toggle();  return srv.send_result("ok"); });
-  server.on("/set/light/3/on",     []() { light[2].turnOn();  return srv.send_result("ok"); });
-  server.on("/set/light/3/off",    []() { light[2].turnOff(); return srv.send_result("ok"); });
-  server.on("/set/light/3/toggle", []() { light[2].toggle();  return srv.send_result("ok"); });
-  server.on("/set/light/4/on",     []() { light[3].turnOn();  return srv.send_result("ok"); });
-  server.on("/set/light/4/off",    []() { light[3].turnOff(); return srv.send_result("ok"); });
-  server.on("/set/light/4/toggle", []() { light[3].toggle();  return srv.send_result("ok"); });
+  for (int i = 0; i < 4; i++)
+    srv.add_light(&light[i]);
 
   //server
   srv.init();
-
-  // Print IP address
-  Serial.print("Use this URL to connect: ");
-  Serial.print("http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("/");
 }
 
 
 void ui_root(){
   String dev_html;
-  dev_html += "<h2>light</h2>";
+  dev_html += "<h2>lights</h2>";
+  for (int i = 0; i < 4; i++)
+    dev_html += light[i].to_html_div();
 
-  //lights
-  for (int i = 0; i < 4; i++){
-    dev_html += "<div";
-    dev_html += " class=\"button " + String(light[i].isOn?"on":"off") + "\"";
-    dev_html += " target=\"set/light/" + String(i+1) + "/toggle\"";
-    dev_html += ">";
-    dev_html += "light "+ String(i+1);
-    dev_html += "</div>";
-  }
-
-  return srv.send_root(dev_html);
+  return srv.send_root(dev_html, NODE_NAME);
 }
 
 void status_json(){
   String json_dev_list;
   for (int i = 0; i < 4; i++)
     json_dev_list += light[i].to_json() + String( i<3?",":"");
-  
-  srv.send_status(json_dev_list);
+  srv.send_status(srv.json_obj_block("lights", json_dev_list));
 }
 
+/// Node HI logic ////////////////////////////////
 void switchCallback(int clicks) {
   Serial.print(clicks);
   Serial.println("");

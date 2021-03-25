@@ -1,63 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NodeName</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        html,body{margin:0;padding: 0;background-color: #222;color: #bbb;font-family: sans-serif;height: 100%;}
-        div {display: flex; flex-flow: row; flex-wrap: wrap;border:1px solid #fff}
-        div>div {flex:1;}
-        .on{background-color: #0a0;color: #fff}
-        
-        /* air conditioner */
-        .ac>div{flex-flow: column;}
-        #ac-pwr, .ac>div>div{padding:1em}
-        #ac-pwr {width: 10em; height: 10em; max-width: 10em;}
-        .ac-temp>div{display: felx; justify-content: center;}
+        body {
+            background-color: #000;
+            color: #eee;
+            font-family: sans-serif
+        }
 
-        /* environment*/
-        .env {height: 10em;}
-        .tmp {margin: auto; justify-content: center; font-size: 3em;}
-
-        /* mobile */
-        @media screen and (max-width: 480px) { 
-
-        }        
+        div.button {
+            width: 10em;
+            height: 10em;
+            display: inline-block;
+            padding: 1em;
+            background-color: #222;
+            margin: .25em
+        }
     </style>
 </head>
-<body>
-    <h1>Living</h1>
-    <!-- <div class="devs">
-        <a href="/set/1/off" class="on">io1</a>
-        <a href="/set/1/off">io2</a>
-        <a href="/set/1/off">io3</a>
-        <a href="/set/1/off" class="on">io4</a>
-        <a href="/set/1/off" class="on">io5</a>
-        <a href="/set/1/off">io6</a>
-        <a href="/set/1/off">io7</a>
-    </div> -->
-    <h2>AC</h2>
-    <div class="devs ac">
-        <div id="ac-pwr" class="on">on</div>
-        <div>
-            <div id="ac-flow">fan</div>
-            <div id="ac-swing">swing</div>
-        </div>
-        <div class="ac-temp">
-            <div>+</div>
-            <div>23</div>
-            <div>-</div>
-        </div>
-    </div>
-    <h2>Env</h2>
-    <div class="env">
-        <div class="tmp">24.5°</div>
-        <div>
-            <div class="hum">54.5%</div>
-            <div class="pre">1008hPa</div>
-        </div>
-    </div>    
 
+<body>
+    <h2>light</h2>
+    <div class="button light off" target="set/light/main/toggle">main</div>
+    <div class="button light off" target="set/light/dicro/toggle">dicro</div>
+    <div class="button light off" target="set/light/bookshelf/toggle">bookshelf</div>
+    <div class="button light off" target="set/light/corner/toggle">corner</div>
+    <script>for(b of document.querySelectorAll("div.button")){let t=b.getAttribute("target");b.addEventListener("click", ()=>{fetch(t).then(()=>{document.location.reload(true)})})}</script>
 </body>
+
 </html>
