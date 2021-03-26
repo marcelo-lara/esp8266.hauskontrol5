@@ -30,14 +30,15 @@ public:
         String r_body;
         r_body += "<html>";
         r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta http-equiv=\"refresh\" content=\"60\"/><style>";
-        r_body += "html,body{background-color:#000;color:#eee;font-family:sans-serif;margin:0;padding:0}";
+        r_body += "html,body,h2{background-color:#000;color:#eee;font-family:sans-serif;margin:0;padding:0}";
+        r_body += "section,h1,h2{padding:15px}";
         r_body += "div.button{width:8em;height:8em;display:inline-block;padding:1em;background-color:#222;margin:.25em;cursor:pointer}";
         r_body += "h1{background-color:#111;color:#ccc}";
         r_body += "div.button.on{background-color:#282}";
         r_body += "</style></head><body>";
-        r_body += "<h1>" + node_name + "</h1>";
+        r_body += "<h1>" + node_name + "</h1><section>";
         r_body += html_devices;
-        r_body += "<script>for(b of document.querySelectorAll(\"div.button\")){let t=b.getAttribute(\"target\");b.addEventListener(\"click\", ()=>{fetch(t).then(()=>{document.location.reload(true)})})}</script>";
+        r_body += "</section><script>for(b of document.querySelectorAll(\"div.button\")){let t=b.getAttribute(\"target\");b.addEventListener(\"click\", ()=>{fetch(t).then(()=>{document.location.reload(true)})})}</script>";
         r_body += ("</body></html>");
         //send
         this->_server->send(200, "text/html", r_body);
