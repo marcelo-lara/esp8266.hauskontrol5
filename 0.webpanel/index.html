@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HausKontrol5</title>
     <style>
-        body{background-color: black;color: #eee;font-family: sans-serif;}
-        div.button{width: 5em;height: 5em;background-color: #111;padding: 1em;cursor: pointer;}
+        body{background-color: black;color: #eee;font-family: sans-serif;box-sizing: content-box;}
+        div.button{width: 5em;height: 5em;background-color: #111;padding: 1em;cursor: pointer;display: inline-block;}
         div.button.on{background-color: rgb(28, 131, 71);}
     </style>
 </head>
@@ -16,6 +16,7 @@
 
     </div>
 
+    <script type="text/javascript" src="src/controller.js"></script>
     <script type="text/javascript" src="src/light.js"></script>
     <script type="text/javascript" src="index.js"></script>
 </body>

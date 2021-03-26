@@ -1,14 +1,24 @@
 'use strict';
 
+const haus = {
+    controllers:[
+        {"name": "living", "uri": "192.168.1.122"},
+        {"name": "suite", "uri": "192.168.1.126"},
+        {"name": "office", "uri": "192.168.1.120"},
+        {"name": "stage3", "uri": "192.168.1.61"}
+    ]
+};
+
+
 (()=>{
 
-    let office_light = new Light({node_url:"http://192.168.1.120", name:"Office Light"});
-    document.getElementById("ui").appendChild(office_light.html);
-    office_light.refresh_status();
+    haus.controllers.forEach(controller => {
+        console.log("::", controller.name, "["+ controller.uri+ "]");
+        controller.obj = new Controller({name: controller.name, uri: controller.uri});
+        controller.obj.discover();
 
-    let living_main_light = new Light({node_url:"http://192.168.1.120", name:"Living Main Light"});
-    document.getElementById("ui").appendChild(living_main_light.html);
-    living_main_light.refresh_status();
+    });
+
 
         
 })();
