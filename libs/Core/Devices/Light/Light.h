@@ -23,7 +23,7 @@ public:
     String to_html_div(){
       String dev_html;
       dev_html += "<div";
-      dev_html += " class=\"button light " + String(this->isOn?"on":"off") + "\"";
+      dev_html += " class=\"block button light " + String(this->isOn?"on":"off") + "\"";
       dev_html += " target=\"set/light/" + this->name + "/toggle\"";
       dev_html += ">";
       dev_html += String(this->name);

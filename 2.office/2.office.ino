@@ -2,6 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>   // Include the WebServer library
 #include <uri/UriRegex.h>
+#include "src/Core/Web/WebServerHelper.h"
 #include "src/wemos.setup/wemos.setup.h"
 
 /////////////////////////////////////////
@@ -14,7 +15,9 @@
 #define bme280_sda      4 // D2 SDA (bme280)
 #define wifiLedPin      2 // D4 builtIn led
 
+#define NODE_NAME "office"
 ESP8266WebServer server(80);    // WebServer object
+WebServerHelper srv(&server);
 
 //// devices ////
 #include "src/Core/Devices/Button/Button.h"
@@ -28,8 +31,6 @@ Environment environment;
 
 
 void setup() {
-  Serial.begin(115200,SERIAL_8N1,SERIAL_TX_ONLY);
-
   pinMode(statusLedPin, OUTPUT);
   digitalWrite(statusLedPin, LOW);
 
@@ -39,7 +40,7 @@ void setup() {
   light.turnOn();
 
   //connect
-  wemosWiFi.connect("office");
+  wemosWiFi.connect(NODE_NAME);
   light.turnOff();
 
   // Start the server
@@ -49,12 +50,6 @@ void setup() {
   environment.setup();
   digitalWrite(statusLedPin, HIGH);
 
-  // Print the IP address
-  Serial.print("Use this URL to connect: ");
-  Serial.print("http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("/");
- 
 }
  
 void loop() {
@@ -68,69 +63,34 @@ void loop() {
 }
 
 void server_setup(){
-  // node
-  server.on("/",                []() { server.send(200, "text/html", ui_root()); return; });
-  server.on("/status",          []() { 
-    server.sendHeader("Access-Control-Allow-Origin", "*");
-    server.send(200, "application/json", status_json()); return; }
-  );
+  // controller
+  server.on("/",                []() { return ui_root();    });
+  server.on("/status",          []() { return status_json();});
 
   // light
-  server.on("/set/light/on",       []() { light.turnOn();    return return_result(); });
-  server.on("/set/light/off",      []() { light.turnOff();   return return_result(); });
-  server.on("/set/light/toggle",   []() { light.toggle();   return return_result(); });
-  server.on("/status/light",       []() { return server.send(200, "application/json", status_pattern(light.isOn)); });
+  srv.add_light(&light);
 
   //server
-  server.onNotFound([](){
-    if (server.method() == HTTP_OPTIONS){
-        server.sendHeader("Access-Control-Allow-Origin", "*");
-        server.sendHeader("Access-Control-Max-Age", "10000");
-        server.sendHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
-        server.sendHeader("Access-Control-Allow-Headers", "*");
-        server.send(204);
-    }else{
-        server.send(404, "text/plain", "");
-    }
-  });  
-  server.begin();
+  srv.init();
 }
 
-String ui_root(){
-  String r_body;
-  r_body += "<html>";
-  r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body>";
+void ui_root(){
+  String dev_html;
+  dev_html += "<h2>lights</h2>";
+  dev_html += light.to_html_div();
+  dev_html += "<h2>environment</h2>";
+  dev_html += environment.to_html_div();
 
-  //light
-  r_body += "<h2>light</h2>";
-  r_body += "<span>";
-  r_body += light.isOn?"On":"Off";
-  r_body += "</span>";
-  r_body += "<a href=\"/set/light/toggle\" target=\"i_result\"><button>switch</button></a><br>";
-
-  r_body += ("</body></html>");
-  return r_body;
+  return srv.send_root(dev_html, NODE_NAME);
 }
 
-String status_json(){
-  String r_body;
-  r_body += "{";
-  r_body += light.to_json() +",";
-  r_body += "\"env\":" + environment.to_json();
-  r_body += "}";
-  return r_body;
-}
-
-String status_pattern(bool state){
-  String r_body;
-  r_body += "{\"statusPattern\":\"";
-  r_body += state?"true":"false";
-  r_body += "\"}";
-  return r_body;
-}
-
-void return_result(){
-  server.sendHeader("Access-Control-Allow-Origin", "*");
-  server.send(200, "application/json", "{\"result\":\"ok\"}"); // Send 
+void status_json(){
+  String json_dev_list;
+  json_dev_list += "{";
+  json_dev_list += srv.json_obj_block("lights", light.to_json());
+  json_dev_list += ",";
+  json_dev_list += srv.json_obj_block("env", environment.to_json());
+  json_dev_list += "}";
+  srv.send_status(json_dev_list);
 }
 
