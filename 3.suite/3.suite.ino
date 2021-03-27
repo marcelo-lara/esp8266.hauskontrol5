@@ -26,7 +26,7 @@
 #define NODE_NAME "suite"
 #include <ESP8266WebServer.h> // web server
 ESP8266WebServer server(80);    
-WebServerHelper srv(&server);
+WebServerHelper srv(&server, NODE_NAME);
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
@@ -48,7 +48,7 @@ void setup() {
   light.turnOn();
 
   //connect
-  wemosWiFi.connect("suite");
+  wemosWiFi.connect("fake-suite");
   light.turnOff();
 
   // Start the server
@@ -79,15 +79,8 @@ void server_setup(){
   server.on("/status",            []() { return status_json(); });
 
   //fan
-  server.on("/set/fan/on",        []() { fan.turnOn();    return HTTP_OK; });
-  server.on("/set/fan/off",       []() { fan.turnOff();   return HTTP_OK; });
-  server.on("/set/fan/speed/1",   []() { fan.setSpeed(1); return HTTP_OK; });
-  server.on("/set/fan/speed/2",   []() { fan.setSpeed(2); return HTTP_OK; });
-  server.on("/set/fan/speed/3",   []() { fan.setSpeed(3); return HTTP_OK; });
-  server.on("/set/fan/speed/4",   []() { fan.setSpeed(4); return HTTP_OK; });
-
-  // light
-  srv.add_light(&light);
+  srv.add_device(&fan);
+  srv.add_device(&light);
 
   //server
   srv.init();
@@ -100,7 +93,7 @@ void ui_root(){
   dev_html += "<h2>fan</h2>";
   dev_html += fan.to_html();
 
-  return srv.send_root(dev_html, NODE_NAME);
+  return srv.send_root(dev_html);
 }
 
 void status_json(){

@@ -17,7 +17,7 @@
 
 #define NODE_NAME "living"
 ESP8266WebServer server(80);    // WebServer object
-WebServerHelper srv(&server);
+WebServerHelper srv(&server, NODE_NAME);
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);

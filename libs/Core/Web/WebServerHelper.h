@@ -1,6 +1,7 @@
 #pragma once
 #include <Arduino.h>
 #include "../Devices/Light/Light.h"
+#include "../Devices/Fan/Fan.h"
 #include <ESP8266WebServer.h>   // Include the WebServer library
 
 class WebServerHelper {
@@ -9,7 +10,8 @@ public:
     String _node_name;
 
 
-    WebServerHelper(ESP8266WebServer *server){
+    WebServerHelper(ESP8266WebServer *server, String node_name){
+        this->_node_name=node_name;
         this->_server = server;
     };
 
@@ -28,8 +30,7 @@ public:
         this->_server->send(200, "application/json", r_body);
     };
 
-    void send_root(String html_devices, String node_name){
-        this->_node_name=node_name;
+    void send_root(String html_devices){
         String r_body;
         r_body += "<html>";
         r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta http-equiv=\"refresh\" content=\"60\"/><style>";
@@ -39,7 +40,7 @@ public:
         r_body += "h1{background-color:#111;color:#ccc}";
         r_body += "div.button.on{background-color:#282}";
         r_body += "</style></head><body>";
-        r_body += "<h1>" + node_name + "</h1><section>";
+        r_body += "<h1>" + String(this->_node_name) + "</h1><section>";
         r_body += html_devices;
         r_body += "</section><script>for(b of document.querySelectorAll(\"div.button\")){let t=b.getAttribute(\"target\");b.addEventListener(\"click\", ()=>{fetch(t).then(()=>{document.location.reload(true)})})}</script>";
         r_body += ("</body></html>");
@@ -83,14 +84,26 @@ public:
 
     // device apis ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //listen to light requests
-    void add_light(Light *light){
+    // lights
+    void add_device(Light *light){
         String baseUri="/set/light/" + String(light->name);
         this->_server->on(String(baseUri + "/on"),     [light, this]() { light->turnOn();  return this->send_result("ok"); });
         this->_server->on(String(baseUri + "/off"),    [light, this]() { light->turnOff(); return this->send_result("ok"); });
         this->_server->on(String(baseUri + "/toggle"), [light, this]() { light->toggle();  return this->send_result("ok"); });
         this->_server->on(String("/sp/light/" + String(light->name)), [light, this]() { return this->status_pattern(light->isOn); });
-    }
+    };
+
+    // fan
+    void add_device(Fan *fan){
+        String baseUri="/set/fan";
+        this->_server->on(String(baseUri + "/on"),      [fan, this]() { fan->turnOn();  return this->send_result("ok"); });
+        this->_server->on(String(baseUri + "/off"),     [fan, this]() { fan->turnOff();  return this->send_result("ok"); });
+        this->_server->on(String(baseUri + "/toggle"),  [fan, this]() { fan->toggle();  return this->send_result("ok"); });
+        for (int i = 0; i < fan->max_speed; i++){
+            this->_server->on(String(baseUri + "/speed/" + String(i+1)),      [fan, this, i]() { fan->setSpeed(i+1);  return this->send_result("ok"); });
+        };
+    };
+  
 
     // helpers ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     String json_obj_block(String block_name, String block_content){

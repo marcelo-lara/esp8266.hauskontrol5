@@ -17,7 +17,7 @@
 
 #define NODE_NAME "office"
 ESP8266WebServer server(80);    // WebServer object
-WebServerHelper srv(&server);
+WebServerHelper srv(&server, NODE_NAME);
 
 //// devices ////
 #include "src/Core/Devices/Button/Button.h"
