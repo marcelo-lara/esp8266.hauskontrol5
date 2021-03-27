@@ -86,11 +86,8 @@ void ui_root(){
 
 void status_json(){
   String json_dev_list;
-  json_dev_list += "{";
-  json_dev_list += srv.json_obj_block("lights", light.to_json());
-  json_dev_list += ",";
+  json_dev_list += srv.json_obj_block("lights", light.to_json()) + ",";
   json_dev_list += srv.json_obj_block("env", environment.to_json());
-  json_dev_list += "}";
   srv.send_status(json_dev_list);
 }
 

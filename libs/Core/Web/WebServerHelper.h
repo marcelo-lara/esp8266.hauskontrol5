@@ -6,6 +6,8 @@
 class WebServerHelper {
 public:
     ESP8266WebServer *_server;
+    String _node_name;
+
 
     WebServerHelper(ESP8266WebServer *server){
         this->_server = server;
@@ -27,6 +29,7 @@ public:
     };
 
     void send_root(String html_devices, String node_name){
+        this->_node_name=node_name;
         String r_body;
         r_body += "<html>";
         r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta http-equiv=\"refresh\" content=\"60\"/><style>";
@@ -51,7 +54,7 @@ public:
 
     void send_status(String json_dev_list){
         String r_body;
-        r_body += "{";
+        r_body += "{\"name\":\"" +  String(this->_node_name) + "\"," ;
         r_body += json_dev_list;
         r_body += "}";
 

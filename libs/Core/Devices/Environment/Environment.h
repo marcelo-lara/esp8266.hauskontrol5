@@ -18,13 +18,11 @@ public:
 
     // json
     String to_json(){
-        return \
-        "{\
+        return "\
             \"temp\":\"" + String(this->temperature) + "\", \
             \"hum\":\"" + String(this->humidity) + "\", \
             \"pres\":\"" + String(this->pressure) + "\", \
-            \"light\":\"" + String(this->light) + "\" \
-        }";
+            \"light\":\"" + String(this->light) + "\"";
     };
 
     // html
