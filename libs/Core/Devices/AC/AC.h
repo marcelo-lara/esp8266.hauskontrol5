@@ -36,7 +36,7 @@ public:
             \"flow\":\""  + String(this->flow)  + "\", \
             \"swing\":\"" + String(this->swing) + "\" \
         }";
-    }
+    };
 
 private:
     int irOut;
