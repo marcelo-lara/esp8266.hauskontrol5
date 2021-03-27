@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>   // Include the WebServer library
 #include <uri/UriRegex.h>
-#include "src/Core/Web/WebServerHelper.h"
+#include "src/Core/Web/WebUi.h"
 #include "src/wemos.setup/wemos.setup.h"
 
 /////////////////////////////////////////
@@ -17,7 +17,7 @@
 
 #define NODE_NAME "living"
 ESP8266WebServer server(80);    // WebServer object
-WebServerHelper srv(&server, NODE_NAME);
+WebUi srv(&server, NODE_NAME);
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);

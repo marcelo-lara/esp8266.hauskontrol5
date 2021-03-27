@@ -4,13 +4,13 @@
 #include "../Devices/Fan/Fan.h"
 #include <ESP8266WebServer.h>   // Include the WebServer library
 
-class WebServerHelper {
+class WebUi {
 public:
     ESP8266WebServer *_server;
     String _node_name;
 
 
-    WebServerHelper(ESP8266WebServer *server, String node_name){
+    WebUi(ESP8266WebServer *server, String node_name){
         this->_node_name=node_name;
         this->_server = server;
     };
