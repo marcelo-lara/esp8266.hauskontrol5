@@ -12,7 +12,11 @@ public:
     void toggle();
     void setSpeed(int _speed);
     int  speed;
+    int  max_speed;
     bool isOn;
+
+    String to_json();
+    String to_html();
 
 private:
     int  onSpeed;

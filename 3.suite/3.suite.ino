@@ -1,5 +1,8 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>   // Include the WebServer library
+#include <uri/UriRegex.h>
+#include "src/Core/Web/WebServerHelper.h"
 #include "src/wemos.setup/wemos.setup.h"
 
 /////////////////////////////////////////
@@ -19,8 +22,11 @@
 #define defSpeed           3 // default speed
 ///////////////////////////////////////////
 
+
+#define NODE_NAME "suite"
 #include <ESP8266WebServer.h> // web server
 ESP8266WebServer server(80);    
+WebServerHelper srv(&server);
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
@@ -69,11 +75,10 @@ void loop() {
 void server_setup(){
 
   //core
-  server.on("/",                  []() { server.send(200, "text/html", ui_root()); return; });
-  server.on("/status",            []() { server.send(200, "application/json", status_pattern(fan.isOn)); return; });
+  server.on("/",                  []() { return ui_root(); });
+  server.on("/status",            []() { return status_json(); });
 
   //fan
-  server.on("/get/fan",           []() { return server.send(200, "application/json", status_pattern(fan.isOn));});
   server.on("/set/fan/on",        []() { fan.turnOn();    return HTTP_OK; });
   server.on("/set/fan/off",       []() { fan.turnOff();   return HTTP_OK; });
   server.on("/set/fan/speed/1",   []() { fan.setSpeed(1); return HTTP_OK; });
@@ -81,94 +86,29 @@ void server_setup(){
   server.on("/set/fan/speed/3",   []() { fan.setSpeed(3); return HTTP_OK; });
   server.on("/set/fan/speed/4",   []() { fan.setSpeed(4); return HTTP_OK; });
 
-  //light
-  server.on("/get/light",         []() { return server.send(200, "application/json", status_pattern(light.isOn)); });
-  server.on("/set/light/on",      []() { light.turnOn();  return HTTP_OK; });
-  server.on("/set/light/off",     []() { light.turnOff(); return HTTP_OK; });
-  server.on("/set/light/toggle",  []() { light.toggle();  return HTTP_OK; });
+  // light
+  srv.add_light(&light);
 
-  //undhandleds
-  server.onNotFound([](){HTTP_404;});  
-  server.begin();
+  //server
+  srv.init();
 }
 
-String ui_root(){
-  String r_body;
-  r_body += "<html>";
-  r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title></title></head><body>";
-  r_body += "<h1>Suite</h1>";
- 
-  r_body += "<h2>light</h2>";
-  r_body += "<span>";
-  r_body += light.isOn?"On":"Off";
-  r_body += "</span>";
-  r_body += "<a href=\"/set/light/toggle\" target=\"i_result\"><button>switch</button></a><br>";
+void ui_root(){
+  String dev_html;
+  dev_html += "<h2>lights</h2>";
+  dev_html += light.to_html_div();
+  dev_html += "<h2>fan</h2>";
+  dev_html += fan.to_html();
 
-  r_body += "<h2>fan</h2>";
-  r_body += "<span>";
-  r_body += fan.isOn?"On":"Off";
-  r_body += "</span>";
-  r_body += "<a href=\"/set/fan/off\" target=\"i_result\"><button>off</button></a>\
-    <a href=\"/set/fan/speed/1\" target=\"i_result\"><button>1</button></a>\
-    <a href=\"/set/fan/speed/2\" target=\"i_result\"><button>2</button></a>\
-    <a href=\"/set/fan/speed/3\" target=\"i_result\"><button>3</button></a>\
-    <a href=\"/set/fan/speed/4\" target=\"i_result\"><button>4</button></a>";
-  r_body += "<iframe name=\"i_result\" height=\"20px\" width=\"100%\" style=\"display:none\"></iframe>";
-
-  r_body += "</body></html>";
-  return r_body;
+  return srv.send_root(dev_html, NODE_NAME);
 }
 
-String status_pattern(bool state){
-  String r_body;
-  r_body += "{\"statusPattern\":\"";
-  r_body += state?"true":"false";
-  r_body += "\"}";
-  return r_body;
+void status_json(){
+  String json_dev_list;
+  json_dev_list += srv.json_obj_block("lights", light.to_json()) + ",";
+  json_dev_list += srv.json_obj_block("fan", fan.to_json());
+  srv.send_status(json_dev_list);
 }
-
-/////////////////////////////////////////////////////////////
-
-void handleStatus(String *args, WiFiClient *client){
-  client->println("HTTP/1.1 200 OK");
-  client->println("Content-Type: application/json");
-  client->println(""); //  do not forget this one
-
-  //light
-  if (args->indexOf("/status/light/1") != -1)  {
-    client->print("{\"statusPattern\": \""); 
-    client->print(light.isOn?"true":"false"); 
-    client->println("\"}");
-    return;
-  }
-
-  //fan
-  if (args->indexOf("/status/fan") != -1)  {
-    client->print("{\"statusPattern\": \""); 
-    client->print(fan.isOn?"true":"false"); 
-    // client->print("{\"speed\": \""); 
-    // client->print(fan.speed); 
-    client->println("\"}");
-    return;
-  }
-
-}
-
-void handleLight(String *args){
-  if (args->indexOf("/set/light/1/on") != -1)     light.turnOn();
-  if (args->indexOf("/set/light/1/off") != -1)    light.turnOff();
-  if (args->indexOf("/set/light/1/toggle") != -1) light.toggle();
-};
-
-void handleFan(String *args){
-  if (args->indexOf("/set/fan/on") != -1)      fan.turnOn();
-  if (args->indexOf("/set/fan/off") != -1)     fan.turnOff();
-  if (args->indexOf("/set/fan/toggle") != -1)  fan.toggle();
-  if (args->indexOf("/set/fan/speed/1") != -1) fan.setSpeed(1);
-  if (args->indexOf("/set/fan/speed/2") != -1) fan.setSpeed(2);
-  if (args->indexOf("/set/fan/speed/3") != -1) fan.setSpeed(3);
-  if (args->indexOf("/set/fan/speed/4") != -1) fan.setSpeed(4);
-};
 
 
 void switchCallback(int clicks) {
