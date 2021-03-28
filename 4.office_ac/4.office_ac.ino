@@ -37,37 +37,7 @@ void setup() {
   server.on("/status",          []() { 
     server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(200, "application/json", status_json()); return; });
-  server.on("/get/ac/on",       []() { server.send(200, "application/json", ac_status_json()); return; });
-
-  // ac settings
-  server.on("/set/ac/on",       []() { ac.turnOn();    return return_result(); });
-  server.on("/set/ac/off",      []() { ac.turnOff();   return return_result(); });
-
-  server.on("/set/ac/temp/21",  []() { ac.setTemp(21); return return_result(); });
-  server.on("/set/ac/temp/22",  []() { ac.setTemp(22); return return_result(); });
-  server.on("/set/ac/temp/23",  []() { ac.setTemp(23); return return_result(); });
-  server.on("/set/ac/temp/24",  []() { ac.setTemp(24); return return_result(); });
-  server.on("/set/ac/temp/25",  []() { ac.setTemp(25); return return_result(); });
-
-  server.on("/set/ac/flow/0",   []() { ac.setFlow(0);  return return_result(); });
-  server.on("/set/ac/flow/1",   []() { ac.setFlow(1);  return return_result(); });
-  server.on("/set/ac/flow/2",   []() { ac.setFlow(2);  return return_result(); });
-
-  server.on("/set/ac/swing/on", []() { ac.swingOn();   return return_result(); });
-  server.on("/set/ac/swing/off",[]() { ac.swingOff();  return return_result(); });
-
-  server.onNotFound([](){
-    if (server.method() == HTTP_OPTIONS){
-        server.sendHeader("Access-Control-Allow-Origin", "*");
-        server.sendHeader("Access-Control-Max-Age", "10000");
-        server.sendHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
-        server.sendHeader("Access-Control-Allow-Headers", "*");
-        server.send(204);
-    }else{
-        server.send(404, "text/plain", "");
-    }
-  });  
-  server.begin();
+  };
   
   //non-critical hardware
   environment.setup();

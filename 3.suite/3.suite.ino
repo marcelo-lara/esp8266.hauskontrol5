@@ -1,7 +1,4 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>   // Include the WebServer library
-#include <uri/UriRegex.h>
 #include "src/Core/Web/WebUi.h"
 #include "src/wemos.setup/wemos.setup.h"
 
@@ -19,14 +16,11 @@
 #define fanOut2           12 // D6
 #define fanOut3           14 // D5
 #define fanOut4           15 // D8
-#define defSpeed           3 // default speed
+#define defSpeed           4 // default speed
 ///////////////////////////////////////////
 
-
 #define NODE_NAME "suite"
-#include <ESP8266WebServer.h> // web server
-ESP8266WebServer server(80);    
-WebUi srv(&server, NODE_NAME);
+WebUi ui(NODE_NAME);
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
@@ -39,8 +33,6 @@ void handleLight(String *args);
 Fan fan(fanOut1, fanOut2, fanOut3, fanOut4, defSpeed); // suite fan
 
 void setup() {
-  pinMode(statusLedPin, OUTPUT);
-  digitalWrite(statusLedPin, LOW);
 
   //core devices
   wallSwitch.setup();
@@ -48,61 +40,28 @@ void setup() {
   light.turnOn();
 
   //connect
-  wemosWiFi.connect("fake-suite");
-  light.turnOff();
+  wemosWiFi.connect(NODE_NAME);
 
-  // Start the server
-  server_setup();
+  //web ui
+  ui.add_device(&fan);
+  ui.add_device(&light);
+  ui.init();
  
   //non-critical hardware
+  light.turnOff();
+  pinMode(statusLedPin, OUTPUT);
   analogWrite(statusLedPin, 50);
-
  
 }
  
 void loop() {
   wemosWiFi.update();
+  ui.update();
 
   wallSwitch.update();
-  server.handleClient();
-
- 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define HTTP_OK  server.send(200, "text/plain", "OK")
-#define HTTP_404 server.send(404, "text/plain", "404: Not found")
-void server_setup(){
-
-  //core
-  server.on("/",                  []() { return ui_root(); });
-  server.on("/status",            []() { return status_json(); });
-
-  //fan
-  srv.add_device(&fan);
-  srv.add_device(&light);
-
-  //server
-  srv.init();
-}
-
-void ui_root(){
-  String dev_html;
-  dev_html += "<h2>lights</h2>";
-  dev_html += light.to_html_div();
-  dev_html += "<h2>fan</h2>";
-  dev_html += fan.to_html();
-
-  return srv.send_root(dev_html);
-}
-
-void status_json(){
-  String json_dev_list;
-  json_dev_list += srv.json_obj_block("lights", light.to_json()) + ",";
-  json_dev_list += srv.json_obj_block("fan", fan.to_json());
-  srv.send_status(json_dev_list);
-}
-
 
 void switchCallback(int clicks) {
 

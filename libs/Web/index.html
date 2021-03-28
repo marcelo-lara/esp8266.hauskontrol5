@@ -1,31 +1,59 @@
 <html>
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="60" />
     <style>
-        body {
+        html,
+        body,
+        h2 {
             background-color: #000;
             color: #eee;
-            font-family: sans-serif
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0
         }
 
-        div.button {
-            width: 10em;
-            height: 10em;
+        section,
+        h1,
+        h2 {
+            padding: 15px
+        }
+
+        div.block {
+            width: 8em;
+            height: 8em;
             display: inline-block;
             padding: 1em;
             background-color: #222;
-            margin: .25em
+            margin: .25em;
+            cursor: pointer
+        }
+
+        h1 {
+            background-color: #111;
+            color: #ccc
+        }
+
+        div.on {
+            background-color: #282
         }
     </style>
 </head>
 
 <body>
-    <h2>light</h2>
-    <div class="button light off" target="set/light/main/toggle">main</div>
-    <div class="button light off" target="set/light/dicro/toggle">dicro</div>
-    <div class="button light off" target="set/light/bookshelf/toggle">bookshelf</div>
-    <div class="button light off" target="set/light/corner/toggle">corner</div>
-    <script>for(b of document.querySelectorAll("div.button")){let t=b.getAttribute("target");b.addEventListener("click", ()=>{fetch(t).then(()=>{document.location.reload(true)})})}</script>
+    <h1>office</h1>
+    <section>
+        <h2>lights</h2>
+        <div class="block button light off" target="set/light/main/toggle">main</div>
+        <h2>fan</h2>
+        <div class="block button fan on" target="set/fan/off">fan</div>
+        <div class="block button fan" target="set/fan/speed/1">1</div>
+        <div class="block button fan" target="set/fan/speed/2">2</div>
+        <div class="block button fan on" target="set/fan/speed/3">3</div>
+        <div class="block button fan" target="set/fan/speed/4">4</div>
+    </section>
+    <script>for (b of document.querySelectorAll("div.button")) { let t = b.getAttribute("target"); b.addEventListener("click", () => { fetch(t).then(() => { document.location.reload(true) }) }) }</script>
 </body>
 
 </html>
