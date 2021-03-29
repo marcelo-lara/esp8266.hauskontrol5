@@ -1,5 +1,6 @@
 #pragma once
 #include "Arduino.h"
+#include "../../Io/ShiftedIo/ShiftedIo.h"
 typedef void LightStatusChanged(int newStatus);
 
 class Light {
@@ -7,6 +8,10 @@ public:
     Light(int _pin);
     Light(int _pin, bool invertOnStatus);
     Light(String _name, int _pin, bool invertOnStatus);
+    Light(ShiftedIo *_shiftedOut, int _bus_position);
+    Light(String _name, ShiftedIo *_shiftedOut, int _bus_position, bool invertOnStatus);
+
+
     void turnOn();
     void turnOff();
     void toggle();
@@ -32,8 +37,14 @@ public:
     }
 
 private:
+
     int pin;
     bool OnIsLow;
     void setOutput(bool newStatus);
+
+    //shifted out
+    bool isShiftedOut;
+    int bus_position;
+    ShiftedIo *shiftedOut;
 
 };

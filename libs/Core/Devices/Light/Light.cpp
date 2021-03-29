@@ -8,6 +8,13 @@ Light::Light(String _name, int _pin, bool invertOnStatus){
     pin=_pin;
     OnIsLow=invertOnStatus;
 }
+Light::Light(ShiftedIo *_shiftedOut, int _bus_position):Light("main", _shiftedOut, _bus_position, false){};
+Light::Light(String _name, ShiftedIo *_shiftedOut, int _bus_position, bool invertOnStatus){
+    this->name=_name;
+    this->isShiftedOut=true;
+    this->bus_position=_bus_position;
+    this->OnIsLow=invertOnStatus;
+};
 
 void Light::turnOn(){
     setOutput(true);
@@ -20,6 +27,13 @@ void Light::toggle(){
 };
 void Light::setOutput(bool newStatus){
     isOn=newStatus;
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, OnIsLow ? (isOn? LOW: HIGH) : (isOn? HIGH: LOW ));
+    if(this->isShiftedOut){
+        //shifted render 
+        this->shiftedOut->setIo(this->bus_position, OnIsLow ? (isOn? LOW: HIGH) : (isOn? HIGH: LOW ));
+    }else{
+        //direct render
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, OnIsLow ? (isOn? LOW: HIGH) : (isOn? HIGH: LOW ));
+    }
+
 };
