@@ -1,7 +1,5 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>   // Include the WebServer library
-#include <uri/UriRegex.h>
 #include "src/Core/Web/WebUi.h"
 #include "src/wemos.setup/wemos.setup.h"
 
