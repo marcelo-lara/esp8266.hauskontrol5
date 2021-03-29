@@ -38,20 +38,39 @@
         div.on {
             background-color: #282
         }
+h3{writing-mode: vertical-rl;display: inline-block;width: 1em; height: 8em;transform: rotate(180deg);}
+.fb{display: flex;}
+.fb>div{flex: 0 0 auto;}
+
     </style>
 </head>
 
 <body>
     <h1>office</h1>
     <section>
-        <h2>lights</h2>
-        <div class="block button light off" target="set/light/main/toggle">main</div>
-        <h2>fan</h2>
-        <div class="block button fan on" target="set/fan/off">fan</div>
-        <div class="block button fan" target="set/fan/speed/1">1</div>
-        <div class="block button fan" target="set/fan/speed/2">2</div>
-        <div class="block button fan on" target="set/fan/speed/3">3</div>
-        <div class="block button fan" target="set/fan/speed/4">4</div>
+        <!-- <h2>lights</h2>
+        <div class="block button light off" target="set/light/main/toggle">main</div> -->
+        <h2>ac</h2>
+        <div class="block button fan on" target="set/ac/off">fan</div>
+        <div class="fb">
+            <h3>temp</h3>
+            <div class="block button ac" target="set/fan/speed/20">20</div>    
+            <div class="block button ac" target="set/fan/speed/21">21</div>    
+            <div class="block button ac" target="set/fan/speed/22">22</div>    
+            <div class="block button ac" target="set/fan/speed/23">23</div>    
+            <div class="block button ac" target="set/fan/speed/24">24</div>    
+        </div>
+        <div class="fb">
+            <h3>flow</h3>
+            <div class="block button ac" target="set/fan/speed/23">min</div>    
+            <div class="block button ac" target="set/fan/speed/24">1</div>    
+            <div class="block button ac" target="set/fan/speed/23">2</div>    
+            <div class="block button ac" target="set/fan/speed/24">max</div>    
+        </div>
+        <div class="fb">
+            <h3>swing</h3>
+            <div class="block button ac" target="set/fan/speed/24">swing</div>    
+        </div>
     </section>
     <script>for (b of document.querySelectorAll("div.button")) { let t = b.getAttribute("target"); b.addEventListener("click", () => { fetch(t).then(() => { document.location.reload(true) }) }) }</script>
 </body>

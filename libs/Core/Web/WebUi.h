@@ -11,10 +11,18 @@
 #include "../Devices/AC/AC.h"
 ESP8266WebServer __server(80);
 
+enum Controller{
+    Office,
+    Suite,
+    OfficeAc
+};
+
 class WebUi {
 public:
     ESP8266WebServer *_server;
     String _node_name;
+    Controller _node;
+
 
     //attached devices
     AC *_ac;
@@ -24,7 +32,7 @@ public:
 
     WebUi(String node_name){
         
-        
+        this->_node = Controller::OfficeAc;
         this->_node_name=node_name;
         this->_server = &__server;
     };
@@ -122,6 +130,8 @@ public:
         this->_server->on("/sp/ac", [ac, this]() { return this->status_pattern(ac->isOn); });
 
         //todo: improve me
+        this->_server->on("/set/ac/temp/19",  [ac, this]() { ac->setTemp(19); return this->send_result("ok"); });
+        this->_server->on("/set/ac/temp/20",  [ac, this]() { ac->setTemp(20); return this->send_result("ok"); });
         this->_server->on("/set/ac/temp/21",  [ac, this]() { ac->setTemp(21); return this->send_result("ok"); });
         this->_server->on("/set/ac/temp/22",  [ac, this]() { ac->setTemp(22); return this->send_result("ok"); });
         this->_server->on("/set/ac/temp/23",  [ac, this]() { ac->setTemp(23); return this->send_result("ok"); });
@@ -159,16 +169,18 @@ public:
         String r_body;
         r_body = "{\"name\":\"" +  String(this->_node_name) + "\"," ;
 
-        // switch (this->_node_name){
-        // case "suite":
-            r_body += this->_json_status(this->_light);
-            r_body += this->_json_status(this->_fan);
-        //     break;
-        // case "officeac":
-        //     r_body += this->_json_status(this->_ac);
-        //     r_body += this->_json_status(this->_environment);
-        //     break;
-        // }
+        switch (this->_node){
+
+        case Controller::Suite :
+           r_body += this->_json_status(this->_light) + ",";
+           r_body += this->_json_status(this->_fan);
+            break;
+
+        case Controller::OfficeAc :
+            r_body += this->_json_status(this->_ac) + ",";
+            r_body += this->_json_status(this->_environment);
+            break;
+        }
 
         r_body += "}";
 
@@ -188,20 +200,75 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+/// Devices ///
+    String _get_html(AC *ac){
+      String dev_html;
+      dev_html += "<div class=\"block button ac ";
+      dev_html += String(ac->isOn?"on":"off");
+      dev_html += "\"";
+      dev_html += "target=\"/set/ac/" + String(ac->isOn?"off":"on") + "\">";
+      dev_html += String(ac->isOn?"on":"off");
+      dev_html += "</div>";
+
+      //temp
+      dev_html += "<div class=\"fb\"><h3>temp</h3>";
+      for (int i = 20; i < 25; i++){
+        dev_html += "<div class=\"block button ac " + String(ac->temp==i?"on":"") + "\" ";
+        dev_html += "target=\"/set/ac/temp/" + String(i) + "\">";
+        dev_html += String(i);
+        dev_html += "</div>";
+      }
+      dev_html += "</div>";
+
+      //flow
+      dev_html += "<div class=\"fb\"><h3>flow</h3>";
+      for (int i = 0; i < 5; i++){
+        dev_html += "<div class=\"block button acflow " + String(ac->flow==i?"on":"") + "\" ";
+        dev_html += "target=\"/set/ac/flow/" + String(i) + "\">";
+        dev_html += String(i);
+        dev_html += "</div>";
+      }
+      dev_html += "</div>";
+
+
+      //swing
+      dev_html += "<div class=\"fb\"><h3>swing</h3>";
+      dev_html += "<div class=\"block button acswing " + String(ac->swing?"on":"off") + "\" ";
+      dev_html += "target=\"/set/ac/swing/" + String(ac->swing?"off":"on") + "\">";
+      dev_html += String(ac->swing?"on":"off");
+      dev_html += "</div>";
+      dev_html += "</div>";
+      return dev_html;
+    };
+
+
+
     void html_ui(){
         String dev_html;
-        // switch (this->_node_name){
-        // case "suite":
+
+        switch (this->_node){
+
+        case Controller::Suite :
             dev_html += "<h2>lights</h2>";
             dev_html += this->_light->to_html_div();
             dev_html += "<h2>fan</h2>";
             dev_html += this->_fan->to_html();
-        //     break;
-        
-        // default:
-        //     dev_html += "<h2>no devices??</h2>";
-        //     break;
-        // }
+            break;
+
+        case Controller::OfficeAc :
+            dev_html += "<h2>environment</h2>";
+            dev_html += this->_environment->to_html();
+            dev_html += "<h2>ac</h2>";
+            dev_html += this->_get_html(this->_ac);
+            break;
+
+
+        default:
+            dev_html += "<h2>no devices??</h2>";
+            break;
+        }
 
         this->send_root(dev_html);
 
@@ -216,6 +283,9 @@ public:
         r_body += "div.block{width:8em;height:8em;display:inline-block;padding:1em;background-color:#222;margin:.25em;cursor:pointer}";
         r_body += "h1{background-color:#111;color:#ccc}";
         r_body += "div.button.on{background-color:#282}";
+        r_body += "h3{writing-mode: vertical-rl;display: inline-block;width: 1em; height: 8em;transform: rotate(180deg);}";
+        r_body += ".fb{display: flex;}";
+        r_body += ".fb>div{flex: 0 0 auto;}";
         r_body += "</style></head><body>";
         r_body += "<h1>" + String(this->_node_name) + "</h1><section>";
         r_body += html_devices;

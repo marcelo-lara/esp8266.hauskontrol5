@@ -26,7 +26,7 @@ public:
     };
 
     // html
-    String to_html_div(){
+    String to_html(){
       String dev_html;
       dev_html += "<div class=\"block env temp\">" + String(this->temperature) + "</div>";
       dev_html += "<div class=\"block env humidity\">" + String(this->humidity) + "</div>";

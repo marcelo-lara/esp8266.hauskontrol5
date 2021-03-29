@@ -32,7 +32,6 @@ void AC::init(){
 
 void AC::turnOn() 
 {
-    Serial.println("-- AC::turnOn() --");
     ac_update(this->temp, this->flow);
     this->isOn=true;
 }
