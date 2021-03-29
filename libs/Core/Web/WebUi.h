@@ -12,9 +12,11 @@
 ESP8266WebServer __server(80);
 
 enum Controller{
-    Office,
     Suite,
-    OfficeAc
+    Office,
+    OfficeAc,
+    Living,
+    Stage3
 };
 
 class WebUi {
@@ -30,8 +32,13 @@ public:
     Light *_light;
     Environment *_environment;
 
+    WebUi(Controller __node, String node_name){
+        this->_node = __node;
+        this->_node_name=node_name;
+        this->_server = &__server;
+    };
+
     WebUi(String node_name){
-        
         this->_node = Controller::OfficeAc;
         this->_node_name=node_name;
         this->_server = &__server;
@@ -180,7 +187,13 @@ public:
             r_body += this->_json_status(this->_ac) + ",";
             r_body += this->_json_status(this->_environment);
             break;
-        }
+
+        case Controller::Stage3 :
+            r_body += this->_json_status(this->_light) + ",";
+            r_body += this->_json_status(this->_fan);
+            break;
+
+        };
 
         r_body += "}";
 
@@ -264,6 +277,12 @@ public:
             dev_html += this->_get_html(this->_ac);
             break;
 
+        case Controller::Stage3 :
+            dev_html += "<h2>lights</h2>";
+            dev_html += this->_light->to_html_div();
+            dev_html += "<h2>fan</h2>";
+            dev_html += this->_fan->to_html();
+            break;
 
         default:
             dev_html += "<h2>no devices??</h2>";
