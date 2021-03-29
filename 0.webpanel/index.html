@@ -9,9 +9,21 @@
         body{background-color: black;color: #eee;font-family: sans-serif;box-sizing: content-box;}
         div.button{width: 5em;height: 5em;background-color: #111;padding: 1em;cursor: pointer;display: inline-block;}
         div.button.on{background-color: rgb(28, 131, 71);}
+        ul{list-style: none; margin: 0; padding: 0;}
+        li{min-height: 3em; margin: 0;}
+        li>a{padding: 3em;color:#ddd; text-decoration: none; background-color: #222; display: block;margin: 5px;}
     </style>
 </head>
 <body>
+    <h2>HausKontrol5</h2>
+    <ul>
+        <li><a href="http://192.168.1.122">living</a></li>
+        <li><a href="http://192.168.1.126">suite</a></li>
+        <li><a href="http://192.168.1.120">office</a></li>
+        <li><a href="http://192.168.1.121">office-ac</a></li>
+        <li><a href="http://192.168.1.61">stage3</a></li>
+    </ul>
+
     <div id="ui"></div>
     <script type="text/javascript" src="src/controller.js"></script>
     <script type="text/javascript" src="src/light.js"></script>
