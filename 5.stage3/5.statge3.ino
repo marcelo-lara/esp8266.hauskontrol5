@@ -28,17 +28,17 @@ Light light(&shiftedIo, fan_light);
 WebUi ui(Controller::Stage3, NODE_NAME);
 
 void setup() {
-  light.turnOn();
+//  light.turnOn();
 
   //connect
-  wemosWiFi.connect("stage3");
+  wemosWiFi.connect(NODE_NAME);
 
   // web ui
   ui.add_device(&fan);
   ui.add_device(&light);
   ui.init();
 
-  light.turnOff();
+//  light.turnOff();
 
 }
  

@@ -12,6 +12,7 @@ Light::Light(ShiftedIo *_shiftedOut, int _bus_position):Light("main", _shiftedOu
 Light::Light(String _name, ShiftedIo *_shiftedOut, int _bus_position, bool invertOnStatus){
     this->name=_name;
     this->isShiftedOut=true;
+    this->shiftedOut=_shiftedOut;
     this->bus_position=_bus_position;
     this->OnIsLow=invertOnStatus;
 };
@@ -29,7 +30,7 @@ void Light::setOutput(bool newStatus){
     isOn=newStatus;
     if(this->isShiftedOut){
         //shifted render 
-        this->shiftedOut->setIo(this->bus_position, OnIsLow ? (isOn? LOW: HIGH) : (isOn? HIGH: LOW ));
+        this->shiftedOut->setIo(this->bus_position, this->isOn);
     }else{
         //direct render
         pinMode(pin, OUTPUT);
