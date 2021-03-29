@@ -20,7 +20,7 @@
 ///////////////////////////////////////////
 
 #define NODE_NAME "suite"
-WebUi ui(NODE_NAME);
+WebUi ui(Controller::Suite, NODE_NAME);
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
