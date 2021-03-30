@@ -169,7 +169,7 @@ public:
     };
 
     String _json_status(Light *light){
-        return "\"light\":{\"" + String(light->name) + "\":\"" + String(light->isOn?"1":"0") + "\"}";
+        return "\"lights\":[{\"" + String(light->name) + "\":\"" + String(light->isOn?"1":"0") + "\"}]";
     };
 
     void json_status(){
@@ -181,6 +181,11 @@ public:
         case Controller::Suite :
            r_body += this->_json_status(this->_light) + ",";
            r_body += this->_json_status(this->_fan);
+            break;
+
+        case Controller::Office :
+            r_body += this->_json_status(this->_light) + ",";
+            r_body += this->_json_status(this->_environment);
             break;
 
         case Controller::OfficeAc :
@@ -275,6 +280,13 @@ public:
             dev_html += this->_environment->to_html();
             dev_html += "<h2>ac</h2>";
             dev_html += this->_get_html(this->_ac);
+            break;
+
+        case Controller::Office :
+            dev_html += "<h2>lights</h2>";
+            dev_html += this->_light->to_html_div();
+            dev_html += "<h2>environment</h2>";
+            dev_html += this->_environment->to_html();
             break;
 
         case Controller::Stage3 :

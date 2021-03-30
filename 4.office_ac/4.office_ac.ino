@@ -15,7 +15,7 @@
 ///////////////////////////////////////////
 
 #define NODE_NAME "officeac"
-WebUi ui(NODE_NAME);
+WebUi ui(Controller::OfficeAc, NODE_NAME);
 
 //// devices ////
 #include "src/Core/Devices/AC/AC.h"

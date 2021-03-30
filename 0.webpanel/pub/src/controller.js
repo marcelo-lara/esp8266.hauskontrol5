@@ -4,30 +4,31 @@ class Controller {
     constructor(args){
         this.name = args.name || "";
         this.uri = args.uri || "";
-        this.lights = new Array();
+        this.devices = new Array();
     }
 
     discover(){
-        if(this.name=="" || this.uri==""){
-            console.log("ERROR: controller missing parameters")
-        }
-
+        if(this.uri==""){console.log("ERROR: controller missing parameters")}
+        let ctrl = this;
         fetch("http://"+this.uri+'/status')
         .then(response => response.json())
         .then((devs)=>{
-            console.log(this.name, devs);
-            
+            ctrl.name=devs.name;
+
             // lights
             if (devs.lights){
                 if(Array.isArray(devs.lights)){
                     devs.lights.forEach(light => {
-                        console.log("- light:", light.name );
-                    })
+                        ctrl.devices.push(new Light({name: light.name, status: light.main=="1"}));
+                    });
                 }else{
-                    console.log("- light:", devs.lights[0] );
-
+                    for (const light in devs.lights) {
+                        ctrl.devices.push(new Light({name: light, status: devs.lights[light]}));
+                    }
                 }
-            }
+
+            
+           };
 
         });        
     }
