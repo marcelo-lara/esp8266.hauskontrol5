@@ -6,27 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HausKontrol5</title>
     <style>
-        body{background-color: black;color: #eee;font-family: sans-serif;box-sizing: content-box;}
-        div.button{width: 5em;height: 5em;background-color: #111;padding: 1em;cursor: pointer;display: inline-block;}
-        div.button.on{background-color: rgb(28, 131, 71);}
-        ul{list-style: none; margin: 0; padding: 0;}
-        li{min-height: 3em; margin: 0;}
-        li>a{padding: 3em;color:#ddd; text-decoration: none; background-color: #222; display: block;margin: 5px;}
+        body,h1,h2,html{background-color:#000;color:#eee;font-family:sans-serif;margin:0;padding:0}
+        h1,section{padding:15px}
+        h1{background-color:#111;color:#ccc}
+        h3{writing-mode:vertical-rl;display:inline-block;width:1em;height:8em;transform:rotate(180deg)}
+        .fb{display:flex}
+        .fb>div{flex:0 0 auto}
+
+        div.box{width:5em;height:5em;display:inline-block;padding:1em;background-color:#222;margin:.25em;cursor:pointer}
+        div.on{background-color:#282}
+
     </style>
 </head>
 <body>
     <h1>HausKontrol5</h1>
-    <ul>
-        <li><a href="http://192.168.1.122">living</a></li>
-        <li><a href="http://192.168.1.126">suite</a></li>
-        <li><a href="http://192.168.1.120">office</a></li>
-        <li><a href="http://192.168.1.121">office-ac</a></li>
-        <li><a href="http://192.168.1.61">stage3</a></li>
-    </ul>
-
     <div id="ui"></div>
+    <!-- devices -->
+    <script type="text/javascript" src="src/ac.js"></script>
+    <script type="text/javascript" src="src/fan.js"></script>
     <script type="text/javascript" src="src/controller.js"></script>
     <script type="text/javascript" src="src/light.js"></script>
+    <!-- -->
     <script type="text/javascript" src="index.js"></script>
 </body>
 </html>

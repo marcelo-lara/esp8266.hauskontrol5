@@ -13,7 +13,39 @@ class Light {
         if(args){
             this.name = args.name || "";
             this.status = args.status || false;
+            this.controller = args.controller || undefined;
+            this.html = undefined;
         }
     }
 
+    update(newDev){
+        
+        //update device
+        this.status = newDev.status;
+        this.name = newDev.name;
+        
+        //render
+        this.html.innerText = this.name;
+        if(this.status>0){
+            this.html.classList.add("on");
+        }else{
+            this.html.classList.remove("on");
+        }
+    }
+
+
+    render(){
+        if(!this.html){
+            let div=document.createElement("div");
+            div.className="button box light";
+            div.addEventListener("click", this.toggle.bind(this));
+            this.html = div;
+        }
+        this.update(this);
+        return this.html;
+    }
+
+    toggle(){
+        this.controller.send("/set/light/" + this.name + "/" + (this.status=="1"?"off":"on"));
+    }
 }

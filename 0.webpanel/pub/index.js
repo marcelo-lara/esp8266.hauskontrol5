@@ -1,6 +1,12 @@
 'use strict';
 const controllers = new Array();
 
+function get_json(uri){
+    return fetch("http://"+uri)
+    .then(response => response.json());
+}
+
+
 (()=>{
     [
         "192.168.1.122",
