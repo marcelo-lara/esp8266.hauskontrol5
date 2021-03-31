@@ -7,16 +7,15 @@ class Controller {
         this.devices = new Array();
         this.devices_elem = undefined;
         this.html = undefined;
-
     }
 
     discover(){
 
         // build element
         if(!this.html){
-            let wrapper = document.createElement("div");
+            let wrapper = document.createElement("section");
             wrapper.classList.add("controller");
-            wrapper.innerHTML = "<section><h2></h2><div class=\"devices\"></div></section>";
+            wrapper.innerHTML = "<h2></h2><div class=\"devices\"></div>";
             this.html = wrapper;
             this.devices_elem = this.html.querySelector("div.devices");
             document.querySelector("div#ui").appendChild(this.html);
@@ -25,9 +24,8 @@ class Controller {
         // query controller
         if(this.uri==""){console.log("ERROR: controller missing parameters")}
         let ctrl = this;
-        fetch("http://"+this.uri+'/status')
-        .then(response => response.json())
-        .then((devs)=>{
+        get_json(this.uri+'/status')
+          .then((devs)=>{
             console.log(devs.name, devs);
 
             ctrl.name=devs.name;
@@ -54,21 +52,14 @@ class Controller {
     }
 
     update_device(dev){
-
         let item = this.devices.find(x=>x.name==dev.name);
-
         if(item){
             item.update(dev);
 
         }else{
-            console.log("not found", dev)
-            //create device if not exists
             this.devices.push(dev);
             this.devices_elem.appendChild(dev.render());
-     
         };
-
-
     }
 
     add_device(device){

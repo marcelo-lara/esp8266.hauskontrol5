@@ -6,7 +6,6 @@ function get_json(uri){
     .then(response => response.json());
 }
 
-
 (()=>{
     [
         "192.168.1.122",

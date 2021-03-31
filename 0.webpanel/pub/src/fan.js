@@ -19,31 +19,35 @@ class Fan {
     }
 
     update(newDev){
-        console.log("update to >", newDev);
+
+        //update device
+        this.status = newDev.status;
+        this.name = newDev.name;
+        
+        //render
+        this.html.innerText = this.name;
+        if(this.status>0){
+            this.html.classList.add("on");
+        }else{
+            this.html.classList.remove("on");
+        }
+
     }
     
     render(){
         if(!this.html){
             let div=document.createElement("div");
-            div.className="button box fan";
-            div.innerText = this.name;
-
-            if(this.status>0){
-                div.classList.add("on");
-            }
-
-            div.addEventListener("click", this.toggle());
-
+            div.className="button box light";
+            
+            div.addEventListener("click", this.toggle.bind(this));
             this.html = div;
-            if(this.controller){
-                this.controller.add_device(this.html);
-            }
         }
+        this.update(this);
         return this.html;
     }
 
     toggle(){
-        
+        this.controller.send("/set/light/" + this.name + "/" + (this.status=="1"?"off":"on"));
     }
 
 }

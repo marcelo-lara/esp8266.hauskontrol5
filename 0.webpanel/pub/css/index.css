@@ -1,0 +1,28 @@
+body,h1,h2,html,div{background-color:#000;color:#eee;font-family:sans-serif;margin:0;padding:0;box-sizing: content-box;}
+h1,section{padding:15px;display: block;}
+h1{background-color:#111;color:#ccc}
+h3{writing-mode:vertical-rl;display:inline-block;width:1em;height:8em;transform:rotate(180deg)}
+div{display:inline-block}
+.fb{display:flex}
+.fb>div{flex:0 0 auto}
+
+div.box{width:5em;height:5em;display:inline-block;padding:1em;background-color:#222;margin:.25em;}
+div.box.hh{height: 2em;display: block;}
+
+.box-bg {background-color:#222;}
+
+/* button */
+div.button{cursor:pointer}
+div.on{background-color:#282}
+
+
+
+/* fan */
+div.fan .pwr{margin: 0;}
+div.fan .speed{}
+div.fan .speed>div{display: flex;flex-direction: column;width:120px;height:120px;}
+div.fan .speed>div>div{flex: 1 1 auto; display: flex;padding: .5em;}
+
+/* 
+div.fan-speed{display: flex;flex-direction: column;}
+div.fan-speed>div{flex: 0 0 auto;padding: 1em;} */

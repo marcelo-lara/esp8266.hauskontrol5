@@ -5,22 +5,27 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HausKontrol5</title>
-    <style>
-        body,h1,h2,html{background-color:#000;color:#eee;font-family:sans-serif;margin:0;padding:0}
-        h1,section{padding:15px}
-        h1{background-color:#111;color:#ccc}
-        h3{writing-mode:vertical-rl;display:inline-block;width:1em;height:8em;transform:rotate(180deg)}
-        .fb{display:flex}
-        .fb>div{flex:0 0 auto}
-
-        div.box{width:5em;height:5em;display:inline-block;padding:1em;background-color:#222;margin:.25em;cursor:pointer}
-        div.on{background-color:#282}
-
-    </style>
+    <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
     <h1>HausKontrol5</h1>
-    <div id="ui"></div>
+    <div id="ui">
+        <!-- <section>
+            <h2>dummy</h2>
+            <div class="devices">
+                <div class="button box light">main</div>
+                <div class="fan">
+                    <div class="button box pwr">fan</div>
+                    <div class="speed">
+                        <div>
+                            <div class="box-bg button up"> up </div>
+                            <div class="box-bg button down"> down </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section> -->
+    </div>
     <!-- devices -->
     <script type="text/javascript" src="src/ac.js"></script>
     <script type="text/javascript" src="src/fan.js"></script>
