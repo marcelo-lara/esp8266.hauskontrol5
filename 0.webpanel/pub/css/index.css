@@ -5,20 +5,23 @@ div{display:inline-block}
 .fb{display:flex}
 .fb>div{flex:0 0 auto}
 
-div.box{width:10em;height:10em;display:inline-block;padding:1em;background-color:#222;margin:.25em}
+div.box{width:10em;height:10em;display:inline-block;padding:1em;background-color:#222;margin:.25em;transition: background-color 1s;}
 div.box.hh{height:2em;display:block}
 .box-bg{background-color:#222}
 div.button{cursor:pointer}
-div.on{background-color:#282}
+div.on{background-color:#282;transition: 1s;}
 
 section {min-height:5em;position:relative; display: block;
     margin: 0 5pt 5pt; background-color: #111; border-left:40px solid #222;padding:5pt;color:rgba(0,0,0,.5);font-size:small;}
 section>h2{font-size:1rem;color:#fff;text-transform:uppercase;letter-spacing:3px;position:absolute;bottom:0;left:0;margin-left:-30px;-webkit-transform:rotate(270deg);-moz-transform:rotate(270deg);-ms-transform:rotate(270deg);-o-transform:rotate(270deg);transform:rotate(270deg);-webkit-transform-origin:0 0;-moz-transform-origin:0 0;-ms-transform-origin:0 0;-o-transform-origin:0 0;transform-origin:0 0}
 
 
-
-div.fan .pwr{margin:0}
-div.fan .overlay {display: none; position: absolute; z-index: 10; top: inherit; left: inherit; }
+div.hide {display: none;}
+div.fan .pwr{margin:0;margin:.25em}
+/* div.fan .overlay {display: none; position: absolute; z-index: 10; top: inherit; left: inherit; }
 div.fan .overlay.visible {display:flex}
 div.fan .overlay>.button {margin-right: 5pt;}
-div.fan .overlay>div{flex: 0 1 auto;margin-right: 5pt;}
+div.fan .overlay>div{flex: 0 1 auto;margin-right: 5pt;} */
+div.fan>div.details{display:none;border-bottom: 1px solid #aaa;height: 0;transition: display 2s;}
+div.details>h3 {padding: 1em;margin:0; border-bottom: 1px solid #aaa;}
+div.fan>div.details.visible{display: block;height: auto;transition: display 2s;}

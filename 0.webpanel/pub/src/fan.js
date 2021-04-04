@@ -15,7 +15,8 @@ class Fan {
             this.status = args.status || false;
             this.controller = args.controller || undefined;
             this.html = undefined;
-            this.overlay_menu= undefined;
+            this.details_menu= undefined;
+            this.button = undefined;
         }
     }
 
@@ -26,16 +27,16 @@ class Fan {
         this.name = newDev.name;
         
         let curr_speed = newDev.status.speed;
-        if(this.overlay_menu.querySelector("div.on")){
-            this.overlay_menu.querySelector("div.on").classList.remove("on");
+        if(this.details_menu.querySelector("div.on")){
+            this.details_menu.querySelector("div.on").classList.remove("on");
         }
-        this.overlay_menu.querySelector("div[val='"+curr_speed+"']").classList.add("on");
+        this.details_menu.querySelector("div[val='"+curr_speed+"']").classList.add("on");
 
         //render
-        if(this.status>0){
-            this.html.classList.add("on");
+        if(curr_speed=="0"){
+            this.button.classList.remove("on");
         }else{
-            this.html.classList.remove("on");
+            this.button.classList.add("on");
         }
 
     }
@@ -45,33 +46,33 @@ class Fan {
             let div=document.createElement("div");
             div.className="fan";
 
-            let inner_menu = "";
+            let inner_menu = "<h3>fan</h3>";
 
             for (let i = 0; i < 5; i++) {
                 inner_menu += "<div class=\"button box\" val=\""+i+"\">"+(i==0?"off":i)+"</div>";                
             }
 
-
             div.innerHTML=
-                "<div class=\"overlay\">" + inner_menu + "</div>" +
-                "<div class=\"button box pwr\">fan</div>";
+                "<div class=\"button box pwr\">fan</div>"+
+                "<div class=\"details\">" + inner_menu + "</div>" +
+                "";
 
-            div.querySelector(".pwr").addEventListener("click", this.overlay.bind(this));
+            this.button = div.querySelector(".pwr");
+            div.querySelector(".pwr").addEventListener("click", this.details.bind(this));
 
-            this.overlay_menu = div.querySelector(".overlay");
-            for (const el of this.overlay_menu.querySelectorAll(".button")) {
+            this.details_menu = div.querySelector(".details");
+            for (const el of this.details_menu.querySelectorAll(".button")) {
                 el.addEventListener("click", this.set_speed.bind(this))
             };
-            
-            //div.addEventListener("click", this.toggle.bind(this));
             this.html = div;
         }
         this.update(this);
         return this.html;
     }
 
-    overlay(){
-        this.overlay_menu.classList.add("visible");
+    details(){
+        this.details_menu.classList.add("visible");
+        this.button.classList.add("hide");
     }
 
     set_speed(src){
@@ -82,7 +83,9 @@ class Fan {
         }else{
             this.controller.send("/set/fan/speed/" + val);
         }
-        this.overlay_menu.classList.remove("visible");
+
+        this.details_menu.classList.remove("visible");
+        this.button.classList.remove("hide");
     }
 
     toggle(){
