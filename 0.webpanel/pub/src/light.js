@@ -11,7 +11,8 @@
 class Light {
     constructor(args){
         if(args){
-            this.name = args.name || "";
+            this.name = args.name || "light";
+            this.ref = args.ref || "main";
             this.status = args.status || false;
             this.controller = args.controller || undefined;
             this.html = undefined;
@@ -46,6 +47,6 @@ class Light {
     }
 
     toggle(){
-        this.controller.send("/set/light/" + this.name + "/" + (this.status=="1"?"off":"on"));
+        this.controller.send("/set/light/" + this.ref + "/" + (this.status=="1"?"off":"on"));
     }
 }

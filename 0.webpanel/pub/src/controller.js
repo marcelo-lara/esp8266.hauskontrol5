@@ -35,11 +35,11 @@ class Controller {
             if (devs.lights){
                 if(Array.isArray(devs.lights)){
                     devs.lights.forEach(light => {
-                        this.update_device(new Light({controller: this, name: "main", status: light.main=="1"}))
+                        this.update_device(new Light({controller: this, ref: "main", status: light.main=="1"}))
                     });
                 }else{
                     for (const light in devs.lights) {
-                        this.update_device(new Light({controller: this, name: light, status: devs.lights[light]}));
+                        this.update_device(new Light({controller: this, name: light, ref: light, status: devs.lights[light]}));
                     }
                 }
             };
