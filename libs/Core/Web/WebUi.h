@@ -33,24 +33,23 @@ public:
     Environment *_environment;
 
     WebUi(Controller __node, String node_name){
+        Serial.begin(115200);
         this->_node = __node;
         this->_node_name=node_name;
         this->_server = &__server;
     };
 
     WebUi(String node_name){
+        Serial.begin(115200);
         this->_node = Controller::OfficeAc;
         this->_node_name=node_name;
         this->_server = &__server;
     };
 
     WebUi(ESP8266WebServer *server, String node_name){
+        Serial.begin(115200);
         this->_node_name=node_name;
         this->_server = server;
-    };
-
-    ESP8266WebServer *get_server(){
-        return this->_server;
     };
 
     void status_pattern(bool state){
