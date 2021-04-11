@@ -18,12 +18,16 @@ Nodes=(
 # set folders
 for node in "${Nodes[@]}"; do
     rm -rf $PWD/$node/src/wemos.setup
+    rm -rf $PWD/$node/src/WebApi
     rm -rf $PWD/$node/src/Core
 
     mkdir -p $node/src
 
     ln -sf $PWD/libs/wemos.setup $PWD/$node/src/wemos.setup
+    ln -sf $PWD/libs/WebApi $PWD/$node/src/WebApi
     ln -sf $PWD/libs/Core $PWD/$node/src/Core
 done
 
 echo "setup complete!"
+
+ln -sf /home/darkangel/esp8266.hauskontrol5/libs/WebApi /home/darkangel/esp8266.hauskontrol5/1.living/src/WebApi

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "src/wemos.setup/wemos.setup.h"
+// #include "src/WebApi/WebApi.h"
 
 /////////////////////////////////////////
 // Hardware Setup
@@ -13,16 +14,15 @@
 
 #define NODE_NAME "living"
 
-
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
 
 #include "src/Core/Devices/Light/Light.h"
-Light light[] = {
-  Light("main", out1, false), // main
-  Light("dicro", out2, false), // dicro
-  Light("bookshelf", out3, false), // bookshelf
-  Light("corner", out4, false)  // corner
+Device* light[] = {
+  new Light("main", out1, false), // main
+  new Light("dicro", out2, false), // dicro
+  new Light("bookshelf", out3, false), // bookshelf
+  new Light("corner", out4, false)  // corner
 };
 
 void setup() {
@@ -32,11 +32,11 @@ void setup() {
   //core devices
   wallSwitch.setup();
   wallSwitch.swCallback=switchCallback;
-  light[0].turnOn();
+  light[0]->turnOn();
 
   //connect
   wemosWiFi.connect(NODE_NAME);
-  light[0].turnOff();
+  light[0]->turnOff();
 
   //non-critical hardware
   analogWrite(statusLedPin, 50);
@@ -60,23 +60,23 @@ void switchCallback(int clicks) {
     break;
 
   case 1:
-    if(light[0].isOn){
+    if(light[0]->isOn){
       turnAllOff();
     }else{
-      light[0].turnOn();
+      light[0]->turnOn();
     };
     break;
 
   case 2:
-    light[1].toggle();
+    light[1]->toggle();
     break;
 
   case 3:
-    light[2].toggle();
+    light[2]->toggle();
     break;
 
   case 4:
-    light[3].toggle();
+    light[3]->toggle();
     break;
 
   default:
@@ -85,8 +85,8 @@ void switchCallback(int clicks) {
 }
 
 void turnAllOff(){
-  light[0].turnOff();
-  light[1].turnOff();
-  light[2].turnOff();
-  light[3].turnOff();
+  light[0]->turnOff();
+  light[1]->turnOff();
+  light[2]->turnOff();
+  light[3]->turnOff();
 }

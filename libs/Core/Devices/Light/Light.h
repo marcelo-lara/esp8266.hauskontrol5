@@ -1,9 +1,10 @@
 #pragma once
 #include "Arduino.h"
+#include "../Device.h"
 #include "../../Io/ShiftedIo/ShiftedIo.h"
 typedef void LightStatusChanged(int newStatus);
 
-class Light {
+class Light : public Device {
 public:
     Light(int _pin);
     Light(int _pin, bool invertOnStatus);
@@ -15,9 +16,6 @@ public:
     void turnOn();
     void turnOff();
     void toggle();
-
-    bool isOn;
-    String name;
 
     // json
     String to_json(){

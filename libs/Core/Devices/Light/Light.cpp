@@ -18,9 +18,11 @@ Light::Light(String _name, ShiftedIo *_shiftedOut, int _bus_position, bool inver
 };
 
 void Light::turnOn(){
+    Serial.println("Light::turnOn()");
     setOutput(true);
 };
 void Light::turnOff(){
+    Serial.println("Light::turnOn()");
     setOutput(false);
 };
 void Light::toggle(){
