@@ -1,8 +1,4 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>   // Include the WebServer library
-#include <uri/UriRegex.h>
-#include "src/Core/Web/WebUi.h"
 #include "src/wemos.setup/wemos.setup.h"
 
 /////////////////////////////////////////
@@ -16,8 +12,7 @@
 #define out4           13 // D7
 
 #define NODE_NAME "living"
-ESP8266WebServer server(80);    // WebServer object
-WebUi srv(&server, NODE_NAME);
+
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
@@ -43,9 +38,6 @@ void setup() {
   wemosWiFi.connect(NODE_NAME);
   light[0].turnOff();
 
-  // WebServer
-  server_setup();
- 
   //non-critical hardware
   analogWrite(statusLedPin, 50);
  
@@ -53,38 +45,7 @@ void setup() {
  
 void loop() {
   wemosWiFi.update();
-  server.handleClient();
   wallSwitch.update();
-}
-
-void server_setup(){
-  // node
-  server.on("/",                []() { return ui_root();});
-  server.on("/status",          []() { return status_json();});
-
-  // lights
-  for (int i = 0; i < 4; i++)
-    srv.add_light(&light[i]);
-
-  //server
-  srv.init();
-}
-
-
-void ui_root(){
-  String dev_html;
-  dev_html += "<h2>lights</h2>";
-  for (int i = 0; i < 4; i++)
-    dev_html += light[i].to_html_div();
-
-  return srv.send_root(dev_html, NODE_NAME);
-}
-
-void status_json(){
-  String json_dev_list;
-  for (int i = 0; i < 4; i++)
-    json_dev_list += light[i].to_json() + String( i<3?",":"");
-  srv.send_status(srv.json_obj_block("lights", json_dev_list));
 }
 
 /// Node HI logic ////////////////////////////////
