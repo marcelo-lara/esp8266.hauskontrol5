@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "src/wemos.setup/wemos.setup.h"
-// #include "src/WebApi/WebApi.h"
+#include "src/WebApi/WebApi.h"
 
 /////////////////////////////////////////
 // Hardware Setup
@@ -13,6 +13,7 @@
 #define out4           13 // D7
 
 #define NODE_NAME "living"
+WebApi api(WebApi::Controller::Living);
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
@@ -36,16 +37,24 @@ void setup() {
 
   //connect
   wemosWiFi.connect(NODE_NAME);
+
+  //link devices
+  api.setup();
+  api.set_devices(light, 4);
+
   light[0]->turnOff();
+
+
 
   //non-critical hardware
   analogWrite(statusLedPin, 50);
- 
+ api.list_devices();
 }
  
 void loop() {
   wemosWiFi.update();
   wallSwitch.update();
+  api.update();
 }
 
 /// Node HI logic ////////////////////////////////

@@ -23,7 +23,7 @@ public:
     }
 
     // html
-    String to_html_div(){
+    String to_html(){
       String dev_html;
       dev_html += "<div";
       dev_html += " class=\"block button light " + String(this->isOn?"on":"off") + "\"";
