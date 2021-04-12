@@ -38,7 +38,7 @@ private:
 
     //api
     void json_send_status();
-
+    void send_result(String result_str);
 
 
 };

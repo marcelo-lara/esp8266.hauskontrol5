@@ -39,16 +39,12 @@ void setup() {
   wemosWiFi.connect(NODE_NAME);
 
   //link devices
-  api.setup();
   api.set_devices(light, 4);
-
-  light[0]->turnOff();
-
-
+  api.setup();
 
   //non-critical hardware
   analogWrite(statusLedPin, 50);
- api.list_devices();
+  light[0]->turnOff();
 }
  
 void loop() {
