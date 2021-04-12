@@ -1,15 +1,15 @@
 #include "Light.h"
 
-Light::Light(int _pin) : Light("main", _pin, false){};
+Light::Light(int _pin): Light("main", _pin, false){};
 Light::Light(int _pin, bool invertOnStatus) : Light("main", _pin, invertOnStatus){};
-Light::Light(String _name, int _pin, bool invertOnStatus){
+Light::Light(String _name, int _pin, bool invertOnStatus) : Device(Device::DevType_e::Light){
+    this->name=_name;
+    this->pin=_pin;
+    this->OnIsLow=invertOnStatus;
     pinMode(pin, OUTPUT);
-    name=_name;
-    pin=_pin;
-    OnIsLow=invertOnStatus;
 }
 Light::Light(ShiftedIo *_shiftedOut, int _bus_position):Light("main", _shiftedOut, _bus_position, false){};
-Light::Light(String _name, ShiftedIo *_shiftedOut, int _bus_position, bool invertOnStatus){
+Light::Light(String _name, ShiftedIo *_shiftedOut, int _bus_position, bool invertOnStatus):Device(Device::DevType_e::Light){
     this->name=_name;
     this->isShiftedOut=true;
     this->shiftedOut=_shiftedOut;
