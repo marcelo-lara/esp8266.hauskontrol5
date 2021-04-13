@@ -1,14 +1,20 @@
 #pragma once
-#include "../Core/Devices/Device.h"
+
+//web related
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>   // Include the WebServer library
+#include <ESP8266WebServer.h>
 #include <uri/UriRegex.h>
 
+//mqtt
+#include <PubSubClient.h>
+
 //device types
+#include "../Core/Devices/Device.h"
 #include "../Core/Devices/Environment/Environment.h"
 #include "../Core/Devices/Light/Light.h"
 #include "../Core/Devices/Fan/Fan.h"
 #include "../Core/Devices/AC/AC.h"
+#define MQTT_CALLBACK_SIG void (*callback)(char*,uint8_t*,unsigned int)
 
 class WebApi {
 public:
@@ -24,12 +30,18 @@ public:
     Device** device_list;
     int      device_count;
     void set_devices(Device** _dev_list, int dev_count);
-    void list_devices();
-
 
     //web ui
     ESP8266WebServer *server;
     void setup_web();
+
+    //mqtt
+    PubSubClient* mqtt;
+    void setup_mqtt();
+    void mqtt_connect();
+    void mqtt_publish();
+
+    void mqtt_callback(char* topic, byte* payload, unsigned int length);
 
 private:
     //web ui

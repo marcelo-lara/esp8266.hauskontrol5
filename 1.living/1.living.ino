@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "src/wemos.setup/wemos.setup.h"
+#include <ESP8266WiFi.h>
 #include "src/WebApi/WebApi.h"
 
 /////////////////////////////////////////

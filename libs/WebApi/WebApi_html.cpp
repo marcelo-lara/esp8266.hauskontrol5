@@ -11,11 +11,13 @@ void WebApi::setup_web(){
     for (int i = 0; i < this->device_count; i++){
         Device* dev = this->device_list[i];
         switch (dev->type){
+
         case Device::DevType_e::Light:
             this->server->on(String("/set/light/" + String(dev->name) + "/toggle"), [this, dev]() { dev->toggle();  return this->send_result("ok"); });
             this->server->on(String("/set/light/" + String(dev->name) + "/on"),     [this, dev]() { dev->turnOn();  return this->send_result("ok"); });
             this->server->on(String("/set/light/" + String(dev->name) + "/off"),    [this, dev]() { dev->turnOff(); return this->send_result("ok"); });
             break;
+
         };
     };
 
@@ -76,7 +78,7 @@ String WebApi::html_dev(Device* dev){
     
     default:
         dev_html += "<div class=\"block" + String(dev->isOn?"on":"off") + "\">";
-        dev_html += "unhandled:" + String(dev->name);
+        dev_html += "unhandled: " + String(dev->name);
         dev_html += "</div>";
         break;
     }    
