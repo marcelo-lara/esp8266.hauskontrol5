@@ -29,5 +29,3 @@ for node in "${Nodes[@]}"; do
 done
 
 echo "setup complete!"
-
-ln -sf /home/darkangel/esp8266.hauskontrol5/libs/WebApi /home/darkangel/esp8266.hauskontrol5/1.living/src/WebApi
