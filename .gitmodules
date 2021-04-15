@@ -7,3 +7,6 @@
 [submodule "libs/BMx280MI-1"]
 	path = libs/BMx280MI-1
 	url = git@github.com:marcelo-lara/BMx280MI-1.git
+[submodule "libs/microgear-esp8266-arduino"]
+	path = libs/microgear-esp8266-arduino
+	url = git@github.com:marcelo-lara/microgear-esp8266-arduino.git
