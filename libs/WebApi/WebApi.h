@@ -14,7 +14,6 @@
 #include "../Core/Devices/Light/Light.h"
 #include "../Core/Devices/Fan/Fan.h"
 #include "../Core/Devices/AC/AC.h"
-#define MQTT_CALLBACK_SIG void (*callback)(char*,uint8_t*,unsigned int)
 
 class WebApi {
 public:
@@ -40,7 +39,6 @@ public:
     void setup_mqtt();
     void mqtt_connect();
     void mqtt_publish();
-
     void mqtt_callback(char* topic, byte* payload, unsigned int length);
 
 private:

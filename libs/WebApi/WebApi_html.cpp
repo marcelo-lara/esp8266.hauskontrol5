@@ -1,8 +1,9 @@
 #include "WebApi.h"
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WEB BLOCKS
+
 void WebApi::setup_web(){
+    this->server = new ESP8266WebServer(80);
 
     this->server->on("/",       [this]() { this->web_send_root();     });
     this->server->on("/status", [this]() { this->json_send_status();  });
