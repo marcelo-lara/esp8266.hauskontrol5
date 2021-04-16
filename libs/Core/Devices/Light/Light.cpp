@@ -18,15 +18,12 @@ Light::Light(String _name, ShiftedIo *_shiftedOut, int _bus_position, bool inver
 };
 
 void Light::turnOn(){
-    Serial.println("Light[" + this->name + "]::turnOn()");
     setOutput(true);
 };
 void Light::turnOff(){
-    Serial.println("Light[" + this->name + "]::turnOff()");
     setOutput(false);
 };
 void Light::toggle(){
-    Serial.println("Light[" + this->name + "]::toggle()");
     setOutput(!isOn);
 };
 void Light::setOutput(bool newStatus){
@@ -39,5 +36,7 @@ void Light::setOutput(bool newStatus){
         pinMode(pin, OUTPUT);
         digitalWrite(pin, OnIsLow ? (isOn? LOW: HIGH) : (isOn? HIGH: LOW ));
     }
+
+    //TODO: callback
 
 };

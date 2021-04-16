@@ -69,39 +69,31 @@ void WebApi::mqtt_publish(Device* dev){
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Functions
+// Callback commands
 
 void WebApi::mqtt_callback(char* topic, byte* p_payload, unsigned int length) {
   String payload;
   for (uint8_t i = 0; i < length; i++) {payload.concat((char)p_payload[i]);};
 
-  Serial.print("| ");
-  Serial.print(this->node_name);
-  Serial.print(" | Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  Serial.print(payload);
-  Serial.println();
+  // Serial.print("| ");
+  // Serial.print(this->node_name);
+  // Serial.print(" | Message arrived [");
+  // Serial.print(topic);
+  // Serial.print("] ");
+  // Serial.print(payload);
+  // Serial.println();
 
   for (int i = 0; i < this->device_count; i++) {
     if (!this->device_list[i]->topic_listen.equals(topic)) continue;
-
-    Serial.print("HIT: ");
-    Serial.print(this->device_list[i]->name);
-    Serial.println("!!");
-
     switch (this->device_list[i]->type){
+
     case Device::DevType_e::Light:
       if (payload.equals(String("ON"))){ this->device_list[i]->turnOn(); };
       if (payload.equals(String("OFF"))){ this->device_list[i]->turnOff(); };
       this->mqtt_publish(this->device_list[i]);
-      
-      Serial.print(payload);
-      Serial.println("<<--");
       break;
     
     };
   };
-
 
 };
