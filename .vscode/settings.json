@@ -11,5 +11,6 @@
         "random": "cpp",
         "*.tcc": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "arduino.defaultBaudRate": 250000
 }

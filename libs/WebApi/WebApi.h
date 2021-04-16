@@ -38,8 +38,13 @@ public:
     PubSubClient* mqtt;
     void setup_mqtt();
     void mqtt_connect();
-    void mqtt_publish();
+    void mqtt_publish(char* topic, char* message);
+    void mqtt_publish(Device* dev);
     void mqtt_callback(char* topic, byte* payload, unsigned int length);
+    
+    long mqtt_retry_time;
+    
+    String mqtt_controller_topic;
 
 private:
     //web ui

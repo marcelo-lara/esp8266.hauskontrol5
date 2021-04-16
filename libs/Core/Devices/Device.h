@@ -15,4 +15,6 @@ public:
     virtual void toggle(){};
     bool isOn=false;
 
+    String topic;
+
 };
