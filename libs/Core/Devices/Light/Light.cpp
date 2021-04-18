@@ -37,6 +37,6 @@ void Light::setOutput(bool newStatus){
         digitalWrite(pin, OnIsLow ? (isOn? LOW: HIGH) : (isOn? HIGH: LOW ));
     }
 
-    //TODO: callback
+    if(this->statusChanged != nullptr) this->statusChanged(this->topic, this->isOn);
 
 };

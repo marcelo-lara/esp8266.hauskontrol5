@@ -2,7 +2,7 @@
 #include "Arduino.h"
 #include "../Device.h"
 #include "../../Io/ShiftedIo/ShiftedIo.h"
-typedef void LightStatusChanged(int newStatus);
+typedef void LightStatusChanged(String topic, bool state);
 
 class Light : public Device {
 public:
@@ -15,6 +15,8 @@ public:
     void turnOn();
     void turnOff();
     void toggle();
+
+    LightStatusChanged* statusChanged;
 
 private:
 
