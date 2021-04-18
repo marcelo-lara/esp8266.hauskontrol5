@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "src/Core/Web/WebUi.h"
 #include "src/wemos.setup/wemos.setup.h"
+#include "src/WebApi/WebApi.h"
 
 /////////////////////////////////////////
 // Hardware Setup
@@ -19,8 +19,8 @@
 #define defSpeed           4 // default speed
 ///////////////////////////////////////////
 
-#define NODE_NAME "suite"
-WebUi ui(Controller::Suite, NODE_NAME);
+#define NODE_NAME "fakesuite"
+WebApi api(WebApi::Controller::Suite);
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
@@ -32,6 +32,9 @@ void handleLight(String *args);
 #include "src/Core/Devices/Fan/Fan.h"
 Fan fan(fanOut1, fanOut2, fanOut3, fanOut4, defSpeed); // suite fan
 
+Device* devices[] = {&light, &fan};
+
+
 void setup() {
 
   //core devices
@@ -41,24 +44,23 @@ void setup() {
 
   //connect
   wemosWiFi.connect(NODE_NAME);
-
-  //web ui
-  ui.add_device(&fan);
-  ui.add_device(&light);
-  ui.init();
+  
+  //link devices
+  api.set_devices(devices, 2);
+  api.setup();
  
+  light.statusChanged=[](String topic, bool state){api.mqtt_publish(&light);};
+
   //non-critical hardware
-  light.turnOff();
   pinMode(statusLedPin, OUTPUT);
   analogWrite(statusLedPin, 50);
  
 }
  
 void loop() {
-  wemosWiFi.update();
-  ui.update();
-
   wallSwitch.update();
+  wemosWiFi.update();
+  api.update();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
