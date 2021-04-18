@@ -1,9 +1,12 @@
 #pragma once
 #include "Arduino.h"
+#include "../Device.h"
 
-class Environment {
+class Environment : public Device {
 public:
     
+    Environment() : Device(Device::DevType_e::Environment, "environment"){};
+
     // values
     float temperature;
     float humidity;

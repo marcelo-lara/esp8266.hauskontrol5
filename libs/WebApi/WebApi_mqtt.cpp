@@ -64,7 +64,20 @@ void WebApi::mqtt_publish(const char* topic, const char* message){
 void WebApi::mqtt_publish(Device* dev){
   const char* topic = dev->topic.c_str();
   const char* msg = dev->isOn?"ON":"OFF";
-  this->mqtt->publish(topic, msg, true);
+
+  switch (dev->type){
+
+    // case Device::DevType_e::Light:
+
+    //   break;
+
+    default:
+
+      this->mqtt->publish(dev->topic.c_str(), dev->isOn?"ON":"OFF", true);
+      break;
+
+  };
+
 };
 
 
@@ -72,17 +85,12 @@ void WebApi::mqtt_publish(Device* dev){
 // Callback commands
 
 void WebApi::mqtt_callback(char* topic, byte* p_payload, unsigned int length) {
+  
+  // get payload
   String payload;
   for (uint8_t i = 0; i < length; i++) {payload.concat((char)p_payload[i]);};
 
-  // Serial.print("| ");
-  // Serial.print(this->node_name);
-  // Serial.print(" | Message arrived [");
-  // Serial.print(topic);
-  // Serial.print("] ");
-  // Serial.print(payload);
-  // Serial.println();
-
+  // run commands
   for (int i = 0; i < this->device_count; i++) {
     if (!this->device_list[i]->topic_listen.equals(topic)) continue;
     switch (this->device_list[i]->type){

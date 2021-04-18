@@ -47,7 +47,7 @@ void WebApi::web_send_root(){
     r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta http-equiv=\"refresh\" content=\"60\"/><style>";
     r_body += "html,body,h2{background-color:#000;color:#eee;font-family:sans-serif;margin:0;padding:0}";
     r_body += "section,h1,h2{padding:15px}";
-    r_body += "div.block{width:8em;height:8em;display:inline-block;padding:1em;background-color:#222;margin:.25em;cursor:pointer}";
+    r_body += "div.block{width:8em;height:8em;display:inline-grid;padding:1em;background-color:#222;margin:.25em;cursor:pointer}";
     r_body += "h1{background-color:#111;color:#ccc}";
     r_body += "div.button.on{background-color:#282}";
     r_body += "h3{writing-mode: vertical-rl;display: inline-block;width: 1em; height: 8em;transform: rotate(180deg);}";
@@ -78,7 +78,7 @@ String WebApi::html_dev(Device* dev){
         break;
     
     default:
-        dev_html += "<div class=\"block" + String(dev->isOn?"on":"off") + "\">";
+        dev_html += "<div class=\"block " + String(dev->isOn?"on":"off") + "\">";
         dev_html += "unhandled: " + String(dev->name);
         dev_html += "</div>";
         break;

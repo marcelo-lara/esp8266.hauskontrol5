@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "src/wemos.setup/wemos.setup.h"
-#include "src/Core/Comm/MqttClient.h"
-#include "src/Core/Web/WebUi.h"
+#include "src/WebApi/WebApi.h"
 
 /////////////////////////////////////////
 // Hardware Setup
@@ -13,9 +12,8 @@
 #define bme280_sda      4 // D2 SDA (bme280)
 #define wifiLedPin      2 // D4 builtIn led
 
-#define NODE_NAME "dummyoffice"
-WebUi ui(Controller::Office, NODE_NAME);
-MqttClient mqtt_client;
+#define NODE_NAME "office"
+WebApi api(WebApi::Controller::Office);
 
 //// devices ////
 #include "src/Core/Devices/Button/Button.h"
@@ -27,6 +25,7 @@ Light light(relayOutPin, true);
 #include "src/Core/Devices/Environment/Environment.h"
 Environment environment;
 
+Device* devices[] = {&light, &environment};
 
 
 void setup() {
@@ -40,27 +39,22 @@ void setup() {
 
   //connect
   wemosWiFi.connect(NODE_NAME);
-  mqtt_client.setup();
+  api.set_devices(devices, 2);
+  api.setup();
+  light.statusChanged=[](String topic, bool state){api.mqtt_publish(&light);};
 
-  // Start the server
-  ui.add_device(&light);
-  ui.add_device(&environment);
-  ui.init();
- 
   //non-critical hardware
   light.turnOff();
   environment.setup();
   digitalWrite(statusLedPin, HIGH);
 
-}
+};
  
 void loop() {
   wallSwitch.update();
   environment.update();
 
   wemosWiFi.update();
-  mqtt_client.update();
-  ui.update();
+  api.update();
 
-}
-
+};
