@@ -18,6 +18,9 @@ WebApi api(WebApi::Controller::Living);
 
 #include "src/Core/Devices/Button/Button.h"
 Button wallSwitch(wallSwitchPin);
+const char* wallSwitch_topic = "hauskontrol/living/button/cmd";
+const char* wallSwitch_cmd_on  = "ON";
+const char* wallSwitch_cmd_off = "OFF";
 
 #include "src/Core/Devices/Light/Light.h"
 Device* light[] = {
@@ -59,18 +62,21 @@ void switchCallback(int clicks) {
   Serial.print(clicks);
   Serial.println("");
   
-  switch (clicks)
-  {
+  switch (clicks){
   case -1:
     turnAllOff();
     break;
 
   case 1:
+    api.mqtt_publish(wallSwitch_topic, wallSwitch_cmd_on);
+
     if(light[0]->isOn){
       turnAllOff();
     }else{
       light[0]->turnOn();
     };
+    
+    api.mqtt_publish(wallSwitch_topic, wallSwitch_cmd_off);
     break;
 
   case 2:

@@ -57,8 +57,8 @@ void WebApi::mqtt_connect() {
 };
 
 
-void WebApi::mqtt_publish(char* topic, char* message){
-  this->mqtt->publish(topic, message, true);
+void WebApi::mqtt_publish(const char* topic, const char* message){
+  this->mqtt->publish(topic, message, false);
 };
 
 void WebApi::mqtt_publish(Device* dev){
