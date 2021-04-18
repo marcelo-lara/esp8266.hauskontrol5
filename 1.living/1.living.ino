@@ -23,12 +23,11 @@ const char* wallSwitch_cmd_on  = "ON";
 const char* wallSwitch_cmd_off = "OFF";
 
 #include "src/Core/Devices/Light/Light.h"
-Device* light[] = {
-  new Light("main", out1, false), // main
-  new Light("dicro", out2, false), // dicro
-  new Light("bookshelf", out3, false), // bookshelf
-  new Light("corner", out4, false)  // corner
-};
+Light l_main = Light("main", out1, false); // main
+Light l_dicro = Light("dicro", out2, false); // dicro
+Light l_bookshelf = Light("bookshelf", out3, false); // bookshelf
+Light l_corner = Light("corner", out4, false);  // corner
+Device* light[] = {&l_main, &l_dicro, &l_bookshelf, &l_corner};
 
 void setup() {
   pinMode(statusLedPin, OUTPUT);
@@ -37,7 +36,7 @@ void setup() {
   //core devices
   wallSwitch.setup();
   wallSwitch.swCallback=switchCallback;
-  light[0]->turnOn();
+  l_corner.turnOn();
 
   //connect
   wemosWiFi.connect(NODE_NAME);
@@ -46,9 +45,15 @@ void setup() {
   api.set_devices(light, 4);
   api.setup();
 
+  l_main.statusChanged = light_callback;
+  l_dicro.statusChanged = light_callback;
+  l_bookshelf.statusChanged = light_callback;
+  l_corner.statusChanged = light_callback;
+  // reinterpret_cast<Light*>(light[0])->statusChanged=light_callback;
+
   //non-critical hardware
   analogWrite(statusLedPin, 50);
-  light[0]->turnOff();
+  l_corner.turnOff();
 }
  
 void loop() {
@@ -56,6 +61,11 @@ void loop() {
   wallSwitch.update();
   api.update();
 }
+
+void light_callback(String topic, bool state){
+  Serial.println(topic);
+  api.mqtt_publish(topic.c_str(), state?"ON":"OFF");
+};
 
 /// Node HI logic ////////////////////////////////
 void switchCallback(int clicks) {
@@ -70,25 +80,25 @@ void switchCallback(int clicks) {
   case 1:
     api.mqtt_publish(wallSwitch_topic, wallSwitch_cmd_on);
 
-    if(light[0]->isOn){
+    if(l_main.isOn){
       turnAllOff();
     }else{
-      light[0]->turnOn();
+      l_main.turnOn();
     };
-    
+
     api.mqtt_publish(wallSwitch_topic, wallSwitch_cmd_off);
     break;
 
   case 2:
-    light[1]->toggle();
+    l_dicro.toggle();
     break;
 
   case 3:
-    light[2]->toggle();
+    l_bookshelf.toggle();
     break;
 
   case 4:
-    light[3]->toggle();
+    l_corner.toggle();
     break;
 
   default:
@@ -97,8 +107,8 @@ void switchCallback(int clicks) {
 }
 
 void turnAllOff(){
-  light[0]->turnOff();
-  light[1]->turnOff();
-  light[2]->turnOff();
-  light[3]->turnOff();
+  l_dicro.turnOff();
+  l_corner.turnOff();
+  l_bookshelf.turnOff();
+  api.mqtt_publish(wallSwitch_topic, wallSwitch_cmd_off);
 }
