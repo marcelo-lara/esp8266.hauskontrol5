@@ -1,9 +1,11 @@
 #pragma once
 #include "Arduino.h"
+#include "../Device.h"
 #include "../../Io/ShiftedIo/ShiftedIo.h"
+
 typedef void FanStatusChanged(int outSpeed);
 
-class Fan {
+class Fan : public Device {
 public:
     Fan(int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed);
     Fan(ShiftedIo *_shiftedOut, int defaultSpeed);
@@ -14,6 +16,8 @@ public:
     int  speed;
     int  max_speed;
     bool isOn;
+
+    FanStatusChanged* statusChanged;
 
     String to_json();
     String to_html();

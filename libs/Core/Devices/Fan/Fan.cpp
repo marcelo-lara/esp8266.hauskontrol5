@@ -1,6 +1,6 @@
 #include "Fan.h"
 
-Fan::Fan(int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed){
+Fan::Fan(int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed) : Device(Device::DevType_e::Fan, "fan") {
     pin1=_pin1; pinMode(pin1, OUTPUT); digitalWrite(pin1, 0);
     pin2=_pin2; pinMode(pin2, OUTPUT); digitalWrite(pin2, 0);
     pin3=_pin3; pinMode(pin3, OUTPUT); digitalWrite(pin3, 0);
@@ -8,7 +8,7 @@ Fan::Fan(int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed){
     onSpeed=_defaultSpeed;
     max_speed=4;
 };
-Fan::Fan(ShiftedIo *_shiftedOut, int _defaultSpeed){
+Fan::Fan(ShiftedIo *_shiftedOut, int _defaultSpeed) : Device(Device::DevType_e::Fan, "fan"){
     this->shiftedOut = _shiftedOut;
     this->isShiftedOut = true;
     this->onSpeed=_defaultSpeed;
@@ -39,12 +39,16 @@ void Fan::setSpeed(int _speed){
 void Fan::render(){
 
     isOn=speed>0;
-    Serial.printf("set_fan: %i\n", speed);
 
     if(isShiftedOut)
         render_shifted();
     else
         render_direct();
+
+    Serial.printf("set_fan: %i\n", speed);
+    if(this->statusChanged != nullptr) 
+        this->statusChanged(speed);
+
 };
 
 void Fan::render_direct(){
