@@ -1,8 +1,9 @@
 #pragma once
 #include "Arduino.h"
+#include "../Device.h"
 typedef void ACStatusChanged(bool isOn);
 
-class AC {
+class AC : public Device {
 public:
     AC(int _irOut, int defaultTemp);
     
