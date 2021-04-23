@@ -15,6 +15,8 @@
 #include "../Core/Devices/Fan/Fan.h"
 #include "../Core/Devices/AC/AC.h"
 
+typedef void MqttTopicReceivedCB(String topic, String payload);
+
 class WebApi {
 public:
     enum Controller {Living, Office, Suite, OfficeAc, Stage3};
@@ -38,13 +40,11 @@ public:
     PubSubClient* mqtt;
     void setup_mqtt();
     void mqtt_connect();
-    void mqtt_publish(const char* topic, const char* message);
+    void mqtt_publish(const char* _topic, const char* _message);
     void mqtt_publish(Device* dev);
-    void mqtt_callback(char* topic, byte* payload, unsigned int length);
-    
-    long mqtt_retry_time;
-    
+    void mqtt_subscribe(const char* topic);
     String mqtt_controller_topic;
+    MqttTopicReceivedCB* mqttTopicReceivedCb; 
 
 private:
     //web ui
@@ -55,5 +55,8 @@ private:
     void json_send_status();
     void send_result(String result_str);
 
+    //mqtt
+    void mqtt_callback(char* topic, byte* payload, unsigned int length);
+    long mqtt_retry_time;
 
 };

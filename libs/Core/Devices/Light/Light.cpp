@@ -28,6 +28,13 @@ void Light::toggle(){
 };
 void Light::setOutput(bool newStatus){
     isOn=newStatus;
+    if(this->statusChanged != nullptr) this->statusChanged(this->topic, this->isOn);
+
+    if(this->isVirtual){
+      Serial.printf("%s | state %s\n", &this->name, this->isOn?"on":"off");
+      return;  
+    } 
+    
     if(this->isShiftedOut){
         //shifted render 
         this->shiftedOut->setIo(this->bus_position, this->isOn);
@@ -36,7 +43,5 @@ void Light::setOutput(bool newStatus){
         pinMode(pin, OUTPUT);
         digitalWrite(pin, OnIsLow ? (isOn? LOW: HIGH) : (isOn? HIGH: LOW ));
     }
-
-    if(this->statusChanged != nullptr) this->statusChanged(this->topic, this->isOn);
 
 };

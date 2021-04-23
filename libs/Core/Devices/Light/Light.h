@@ -6,6 +6,10 @@ typedef void LightStatusChanged(String topic, bool state);
 
 class Light : public Device {
 public:
+    //virtual device
+    Light(String _name):Device(Device::DevType_e::Light){this->name=_name; this->isVirtual=true;};
+    
+    //actual device
     Light(int _pin);
     Light(int _pin, bool invertOnStatus);
     Light(String _name, int _pin, bool invertOnStatus);
@@ -28,5 +32,7 @@ private:
     bool isShiftedOut;
     int bus_position;
     ShiftedIo *shiftedOut;
+
+
 
 };

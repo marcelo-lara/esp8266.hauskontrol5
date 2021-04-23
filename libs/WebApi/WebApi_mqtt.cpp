@@ -2,7 +2,7 @@
 ////////////////////////
 // MQTT blocks
 
-#define MQTT_CLIENT_ID "office_light1"
+#define MQTT_CLIENT_ID "living_controller"
 #define MQTT_SERVER_IP "192.168.1.201"
 #define MQTT_SERVER_PORT 1883
 #define MQTT_USER "darkblue"
@@ -38,14 +38,27 @@ void WebApi::mqtt_connect() {
   
   if (this->mqtt->connected()) return;
   if (this->mqtt_retry_time > millis()) return;
-  Serial.print("MQTT| connecting...");
+
+  Serial.print("mqtt | connecting... ");
+
+    //const char* client_id = String(this->node_name + "_controller").c_str();
 
     if (this->mqtt->connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD)) {
       Serial.println("ok!");
 
       for (int i = 0; i < this->device_count; i++) {
-        this->mqtt->subscribe(String(this->device_list[i]->topic + "/set").c_str());
-        this->mqtt_publish(this->device_list[i]);
+        
+        if(this->device_list[i]->isVirtual){
+
+          // virtual device listen to state updates
+          this->mqtt->subscribe(String(this->device_list[i]->topic).c_str());
+        }else{
+
+          // actual device listen to setter topic and publish updates
+          this->mqtt->subscribe(String(this->device_list[i]->topic + "/set").c_str());
+          this->mqtt_publish(this->device_list[i]);
+        };
+
       };
 
     } else {
@@ -56,9 +69,13 @@ void WebApi::mqtt_connect() {
     }
 };
 
+void WebApi::mqtt_subscribe(const char* topic){
+  this->mqtt->subscribe(topic);
+};
 
-void WebApi::mqtt_publish(const char* topic, const char* message){
-  this->mqtt->publish(topic, message, false);
+void WebApi::mqtt_publish(const char* _topic, const char* _message){
+  Serial.printf("mqtt publish | %s: %s", _topic, _message);
+  this->mqtt->publish(_topic, _message, true);
 };
 
 void WebApi::mqtt_publish(Device* dev){
@@ -103,5 +120,8 @@ void WebApi::mqtt_callback(char* topic, byte* p_payload, unsigned int length) {
     
     };
   };
+
+  // trigger callback
+  if(this->mqttTopicReceivedCb != nullptr) this->mqttTopicReceivedCb(topic, payload);
 
 };

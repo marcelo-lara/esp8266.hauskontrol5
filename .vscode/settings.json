@@ -12,5 +12,6 @@
         "*.tcc": "cpp",
         "typeinfo": "cpp"
     },
-    "arduino.defaultBaudRate": 250000
+    "arduino.defaultBaudRate": 250000,
+    "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }
