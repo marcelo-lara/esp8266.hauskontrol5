@@ -17,8 +17,7 @@ const uint8_t kAc_Flow_Wall[4] = {0, 2, 4, 5};
 //private
 void ac_update(unsigned int temperature, unsigned int air_flow);
 
-AC::AC(int _irOut, int defaultTemp) 
-{
+AC::AC(int _irOut, int defaultTemp) : Device(Device::DevType_e::AC, "ac"){
     // defaults
     temp  = 23;
     flow  = 0;

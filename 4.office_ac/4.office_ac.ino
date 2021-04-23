@@ -1,6 +1,5 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include "src/Core/Web/WebUi.h"
+#include "src/WebApi/WebApi.h"
 #include "src/wemos.setup/wemos.setup.h"
 
 /////////////////////////////////////////
@@ -15,7 +14,7 @@
 ///////////////////////////////////////////
 
 #define NODE_NAME "officeac"
-WebUi ui(Controller::OfficeAc, NODE_NAME);
+WebApi api(WebApi::Controller::OfficeAc);
 
 //// devices ////
 #include "src/Core/Devices/AC/AC.h"
@@ -23,6 +22,7 @@ AC ac(irSendPin, 24);
 
 #include "src/Core/Devices/Environment/Environment.h"
 Environment environment;
+Device* devices[] = {&ac, &environment};
 
 void setup() {
 
@@ -36,10 +36,8 @@ void setup() {
   environment.setup();
 
   //web ui
-  ui.add_device(&ac);
-  ui.add_device(&environment);
-  ui.init();
-
+  api.set_devices(devices, 2);
+  api.setup();
 
   pinMode(acOnLedPin, OUTPUT);
   digitalWrite(acOnLedPin, HIGH);
@@ -47,8 +45,8 @@ void setup() {
 
 void loop() {
   wemosWiFi.update();
+  api.update();
 
   environment.update();
-  ui.update();
 
 }
