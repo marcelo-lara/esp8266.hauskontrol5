@@ -42,6 +42,7 @@ public:
     void mqtt_connect();
     void mqtt_publish(const char* _topic, const char* _message);
     void mqtt_publish(Device* dev);
+    void mqtt_publish(Fan* fan);
     void mqtt_subscribe(const char* topic);
     String mqtt_controller_topic;
     MqttTopicReceivedCB* mqttTopicReceivedCb; 

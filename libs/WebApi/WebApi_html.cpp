@@ -13,11 +13,22 @@ void WebApi::setup_web(){
         Device* dev = this->device_list[i];
         switch (dev->type){
 
-        case Device::DevType_e::Light:
+        case Device::DevType_e::Light:{
             this->server->on(String("/set/light/" + String(dev->name) + "/toggle"), [this, dev]() { dev->toggle();  return this->send_result("ok"); });
             this->server->on(String("/set/light/" + String(dev->name) + "/on"),     [this, dev]() { dev->turnOn();  return this->send_result("ok"); });
             this->server->on(String("/set/light/" + String(dev->name) + "/off"),    [this, dev]() { dev->turnOff(); return this->send_result("ok"); });
             break;
+        }
+
+        case Device::DevType_e::Fan:{
+            this->server->on(String("/set/fan/toggle"), [this, dev]() { dev->toggle();  return this->send_result("ok"); });
+            this->server->on(String("/set/fan/on"),     [this, dev]() { dev->turnOn();  return this->send_result("ok"); });
+            this->server->on(String("/set/fan/off"),    [this, dev]() { dev->turnOff(); return this->send_result("ok"); });
+            for (int i = 0; i < ((Fan*)dev)->max_speed+1; i++){
+                this->server->on(String("/set/fan/speed/"+ String(i)),    [this, dev, i]() {  ((Fan*)dev)->setSpeed(i); return this->send_result("ok"); });
+            };
+            break;
+        }
 
         };
     };
@@ -68,7 +79,8 @@ void WebApi::web_send_root(){
 String WebApi::html_dev(Device* dev){
     String dev_html;
     switch (dev->type){
-    case Device::DevType_e::Light:
+    
+    case Device::DevType_e::Light:{
         dev_html += "<div";
         dev_html += " class=\"block button light " + String(dev->isOn?"on":"off") + "\"";
         dev_html += " target=\"set/light/" + dev->name + "/toggle\"";
@@ -76,13 +88,35 @@ String WebApi::html_dev(Device* dev){
         dev_html += String(dev->name);
         dev_html += "</div>";
         break;
+    }
     
-    default:
+    case Device::DevType_e::Fan:{
+        Fan* fan = (Fan*)dev;
+        for (int i = 0; i < fan->max_speed+1; i++){
+            dev_html += "<div";
+            if(i==0){
+                dev_html += " class=\"block button fan " + String(fan->isOn?"on":"off") + "\"";
+                dev_html += " target=\"set/fan/" + String(fan->isOn?"off":"on")  + "\"";
+                dev_html += ">";
+                dev_html += "fan";
+            }else{
+                dev_html += " class=\"block button fan " + String(i==fan->speed?"on":"") + "\"";
+                dev_html += " target=\"set/fan/speed/" + String(i) + "\"";
+                dev_html += ">";
+                dev_html += String(i);
+            };
+            dev_html += "</div>";
+        };
+        break;
+    }
+
+    default:{
         dev_html += "<div class=\"block " + String(dev->isOn?"on":"off") + "\">";
         dev_html += "unhandled: " + String(dev->name);
         dev_html += "</div>";
         break;
-    }    
+        }
+    };
     return dev_html;
 };
 
@@ -95,12 +129,26 @@ void WebApi::json_send_status(){
     // lights array
     r_body += "\"lights\":[";
     for (int i = 0; i < this->device_count; i++){
-        if(this->device_list[i]->type==Device::DevType_e::Light){
+        if(!this->device_list[i]->type == Device::DevType_e::Light){
             r_body += "{\"" + String(device_list[i]->name) + "\":\"" + String(device_list[i]->isOn?"1":"0") + "\"},";
         };
     };
     r_body = r_body.substring(0, r_body.length()-1);
     r_body += "]";
+
+    // devices
+    for (int i = 0; i < this->device_count; i++){
+        if(this->device_list[i]->type==Device::DevType_e::Light) continue;
+        switch (device_list[i]->type){
+        
+        case Device::DevType_e::Fan:{ //"fan":{"speed":"4"}
+            r_body += ",\"fan\":{\"speed\":\"" + String(((Fan*)device_list[i])->speed) + "\"}";
+        }
+
+        };
+
+    }
+    
 
     r_body += "}";
 

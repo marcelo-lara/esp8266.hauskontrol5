@@ -49,7 +49,9 @@ void setup() {
   api.set_devices(devices, 2);
   api.setup();
  
+  //mqtt publish
   light.statusChanged=[](String topic, bool state){api.mqtt_publish(&light);};
+  fan.statusChanged=[](int outSpeed){api.mqtt_publish((Fan*)(&fan));};
 
   //non-critical hardware
   pinMode(statusLedPin, OUTPUT);

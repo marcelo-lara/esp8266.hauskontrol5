@@ -6,6 +6,7 @@ WebApi::WebApi(Controller _controller){
         case Living: this->node_name="living";break;
         case Office: this->node_name="office";break;
         case OfficeAc: this->node_name="officeac";break;
+        case Suite: this->node_name="suite";break;
         case Stage3: this->node_name="stage3";break;
     }
 };

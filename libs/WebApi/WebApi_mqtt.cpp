@@ -2,7 +2,7 @@
 ////////////////////////
 // MQTT blocks
 
-#define MQTT_CLIENT_ID "living_controller"
+#define MQTT_CLIENT_ID "suite_controller"
 #define MQTT_SERVER_IP "192.168.1.201"
 #define MQTT_SERVER_PORT 1883
 #define MQTT_USER "darkblue"
@@ -89,6 +89,8 @@ void WebApi::mqtt_publish(Device* dev){
     //   break;
 
     default:
+      const char* topic = dev->topic.c_str();
+      const char* msg = dev->isOn?"ON":"OFF";
 
       this->mqtt->publish(dev->topic.c_str(), dev->isOn?"ON":"OFF", true);
       break;
@@ -97,6 +99,14 @@ void WebApi::mqtt_publish(Device* dev){
 
 };
 
+void WebApi::mqtt_publish(Fan* fan){
+      const char* topic = fan->topic.c_str();
+      const char* msg = fan->isOn?"ON":"OFF";
+
+      //char* status = topic + "status";
+
+      Serial.printf("mqtt fan | %s\n", topic);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Callback commands

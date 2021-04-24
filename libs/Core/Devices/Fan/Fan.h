@@ -19,8 +19,14 @@ public:
 
     FanStatusChanged* statusChanged;
 
-    String to_json();
-    String to_html();
+    //mqtt
+    String topic_status;
+    String topic_status_set;
+    String topic_speed;
+    String topic_speed_set;
+    String topic_preset_mode;
+    String topic_preset_mode_set;
+
 
 private:
     int  onSpeed;

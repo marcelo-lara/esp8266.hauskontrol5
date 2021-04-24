@@ -66,32 +66,3 @@ void Fan::render_shifted(){
         this->shiftedOut->setIo(i, speed>i, true);
     this->shiftedOut->render();
 };
-
-
-////////////////////////////////////////////////////////////
-// api
-
-String Fan::to_json(){
-    return "\"speed\":\"" + String(this->speed) + "\"";
-};
-String Fan::to_html(){
-    String dev_html;
-
-    for (int i = 0; i < this->max_speed+1; i++){
-        dev_html += "<div";
-        if(i==0){
-            dev_html += " class=\"block button fan " + String(this->isOn?"on":"off") + "\"";
-            dev_html += " target=\"set/fan/" + String(this->isOn?"off":"on")  + "\"";
-            dev_html += ">";
-            dev_html += "fan";
-        }else{
-            dev_html += " class=\"block button fan " + String(i==this->speed?"on":"") + "\"";
-            dev_html += " target=\"set/fan/speed/" + String(i) + "\"";
-            dev_html += ">";
-            dev_html += String(i);
-        };
-        dev_html += "</div>";
-    }
-    
-    return dev_html;
-};

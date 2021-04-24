@@ -16,6 +16,7 @@ public:
     virtual void toggle(){};
     bool isOn=false;
 
+    // mqtt
     String topic;
     String topic_listen;
     
