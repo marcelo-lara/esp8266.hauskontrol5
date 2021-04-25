@@ -34,6 +34,7 @@ void setup() {
 
   //non-critical hardware
   environment.setup();
+  environment.statusUpdated = [](bool state){api.mqtt_publish(&environment);};
 
   //web ui
   api.set_devices(devices, 2);

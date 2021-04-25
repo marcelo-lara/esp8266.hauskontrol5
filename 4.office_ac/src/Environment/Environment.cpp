@@ -57,6 +57,8 @@ void Environment::update(){
 
     //wait until next read
     _measuring=false;
-    lastUpdated = millis()+1000;
+    if(this->statusUpdated != nullptr) this->statusUpdated(this->isOn);
+
+    lastUpdated = millis()+5000;
 };
 
