@@ -57,6 +57,8 @@ void setup() {
   pinMode(statusLedPin, OUTPUT);
   analogWrite(statusLedPin, 50);
  
+  light.turnOff();
+
 }
  
 void loop() {
