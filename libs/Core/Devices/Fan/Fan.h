@@ -17,6 +17,9 @@ public:
     int  max_speed;
     bool isOn;
 
+    String mode = "auto";
+    void setMode(String _mode){this->mode=_mode;};
+
     FanStatusChanged* statusChanged;
 
     //mqtt
@@ -24,9 +27,8 @@ public:
     String topic_status_set;
     String topic_speed;
     String topic_speed_set;
-    String topic_preset_mode;
-    String topic_preset_mode_set;
-
+    String topic_mode;
+    String topic_mode_set;
 
 private:
     int  onSpeed;
