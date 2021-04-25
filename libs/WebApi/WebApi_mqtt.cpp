@@ -28,14 +28,12 @@ void WebApi::setup_mqtt(){
       }
 
       case Device::DevType_e::Fan:{
+        
+        // set topics
         ((Fan*)this->device_list[i])->topic = String(ctrl_root + "fan");
         ((Fan*)this->device_list[i])->topic_status = String(ctrl_root + "fan/status");
         ((Fan*)this->device_list[i])->topic_speed  = String(ctrl_root + "fan/speed");
         ((Fan*)this->device_list[i])->topic_mode   = String(ctrl_root + "fan/mode");
-
-        ((Fan*)this->device_list[i])->topic_status_set = String(ctrl_root + "fan/status/set");
-        ((Fan*)this->device_list[i])->topic_speed_set = String(ctrl_root + "fan/speed/set");
-        ((Fan*)this->device_list[i])->topic_mode_set  = String(ctrl_root + "fan/mode/set");
 
         break;
       }
@@ -82,9 +80,9 @@ void WebApi::mqtt_connect() {
 
           case Device::DevType_e::Fan:{
             Fan* fan = (Fan*)this->device_list[i];
-            this->mqtt_subscribe(fan->topic_status_set.c_str());
-            this->mqtt_subscribe(fan->topic_speed_set.c_str());
-            this->mqtt_subscribe(fan->topic_mode_set.c_str());
+            this->mqtt_subscribe(String(fan->topic_status + "/set").c_str());
+            this->mqtt_subscribe(String(fan->topic_speed + "/set").c_str());
+            this->mqtt_subscribe(String(fan->topic_mode + "/set").c_str());
             this->mqtt_publish(fan);
             break;
           }
@@ -110,6 +108,10 @@ void WebApi::mqtt_subscribe(const char* topic){
 };
 
 // Callback commands
+std::string tail(std::string const& source, size_t const length) {
+  if (length >= source.size()) { return source; }
+  return source.substr(source.size() - length);
+} // tail
 
 void WebApi::mqtt_callback(char* topic, byte* p_payload, unsigned int length) {
   
@@ -125,19 +127,26 @@ void WebApi::mqtt_callback(char* topic, byte* p_payload, unsigned int length) {
 
   // run commands
   for (int i = 0; i < this->device_count; i++) {
-    
-    //strncmp
-    // if (!this->device_list[i]->topic_listen.equals(topic)) continue;
-    // switch (this->device_list[i]->type){
+    const char* dev_topic = this->device_list[i]->topic.c_str();
+    if(strncmp(dev_topic, topic, strlen(dev_topic)) != 0 ) continue;
 
-    //   case Device::DevType_e::Light:{
-    //     if (payload.equals(String("ON"))){ this->device_list[i]->turnOn(); };
-    //     if (payload.equals(String("OFF"))){ this->device_list[i]->turnOff(); };
-    //     this->mqtt_publish(this->device_list[i]);
-    //     break;
-    //   }
+    String cmd = tail(topic, strlen(topic) - strlen(dev_topic)).c_str();
+    Serial.print("  -> ");
+    Serial.println( cmd );
+    switch (this->device_list[i]->type){
 
-    // };
+      case Device::DevType_e::Light:{
+        if (payload.equals(String("ON"))){ this->device_list[i]->turnOn(); };
+        if (payload.equals(String("OFF"))){ this->device_list[i]->turnOff(); };
+        this->mqtt_publish(this->device_list[i]);
+        break;
+      }
+      case Device::DevType_e::Fan:{
+        this->mqtt_handle_callback((Fan*)this->device_list[i], cmd, payload);
+        break;
+      }
+
+    };
   };
 
   // trigger callback
@@ -160,10 +169,6 @@ void WebApi::mqtt_publish(Device* dev){
 
   switch (dev->type){
 
-    // case Device::DevType_e::Light:
-
-    //   break;
-
     default:
       const char* topic = dev->topic.c_str();
       const char* msg = dev->isOn?"ON":"OFF";
@@ -176,12 +181,38 @@ void WebApi::mqtt_publish(Device* dev){
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
+
+// fan
 void WebApi::mqtt_publish(Fan* fan){
-
-
   this->mqtt_publish(fan->topic_status.c_str(), fan->isOn?"ON":"OFF");
   this->mqtt_publish(fan->topic_mode.c_str(), fan->mode.c_str());
   this->mqtt_publish(fan->topic_speed.c_str(), String(fan->speed).c_str());
 };
 
+void WebApi::mqtt_handle_callback(Fan* fan, String cmd, String payload){
+  
+  if(cmd == "/status/set"){
+    if (payload == "ON") fan->turnOn();
+    if (payload == "OFF") fan->turnOff();
+    return;
+  };
+
+  if(cmd == "/speed/set"){
+    if (payload == "1") fan->setSpeed(1);
+    if (payload == "2") fan->setSpeed(2);
+    if (payload == "3") fan->setSpeed(3);
+    if (payload == "4") fan->setSpeed(4);
+    if (payload == "5") fan->setSpeed(5);
+    return;
+  };
+
+  if(cmd == "/mode/set"){
+    fan->setMode(payload);
+    return;
+  };
+
+  Serial.print("  unhandled: ");
+  Serial.print(cmd);
+  Serial.print(" > ");
+  Serial.println(payload);
+}

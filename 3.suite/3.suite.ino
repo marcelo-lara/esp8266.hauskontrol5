@@ -19,7 +19,7 @@
 #define defSpeed           4 // default speed
 ///////////////////////////////////////////
 
-#define NODE_NAME "fakesuite"
+#define NODE_NAME "suite"
 WebApi api(WebApi::Controller::Suite);
 
 #include "src/Core/Devices/Button/Button.h"

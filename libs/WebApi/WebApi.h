@@ -44,6 +44,7 @@ public:
     void mqtt_publish(Device* dev);
     void mqtt_publish(Fan* fan);
     void mqtt_subscribe(const char* topic);
+    void mqtt_handle_callback(Fan* fan, String cmd, String payload);
     String mqtt_controller_topic;
     MqttTopicReceivedCB* mqttTopicReceivedCb; 
 

@@ -37,7 +37,6 @@ void Fan::setSpeed(int _speed){
 ///////////////////////////////////////////////////////////////////
 // Hardware IO
 void Fan::render(){
-
     isOn=speed>0;
 
     if(isShiftedOut)
@@ -45,7 +44,7 @@ void Fan::render(){
     else
         render_direct();
 
-    Serial.printf("set_fan: %i\n", speed);
+    Serial.printf("fan| speed %i\n", speed);
     if(this->statusChanged != nullptr) 
         this->statusChanged(speed);
 

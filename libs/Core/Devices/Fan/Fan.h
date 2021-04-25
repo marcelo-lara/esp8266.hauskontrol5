@@ -18,17 +18,14 @@ public:
     bool isOn;
 
     String mode = "auto";
-    void setMode(String _mode){this->mode=_mode;};
+    void setMode(String _mode){this->mode=_mode; if(this->statusChanged != nullptr) this->statusChanged(speed);};
 
     FanStatusChanged* statusChanged;
 
     //mqtt
     String topic_status;
-    String topic_status_set;
     String topic_speed;
-    String topic_speed_set;
     String topic_mode;
-    String topic_mode_set;
 
 private:
     int  onSpeed;
