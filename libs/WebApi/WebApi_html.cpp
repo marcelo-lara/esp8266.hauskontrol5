@@ -30,6 +30,8 @@ void WebApi::setup_web(){
             break;
         }
 
+
+
         };
     };
 
@@ -110,6 +112,16 @@ String WebApi::html_dev(Device* dev){
         break;
     }
 
+    case Device::DevType_e::Environment:{
+        Environment* env = (Environment*)dev;
+
+        dev_html += "<div class=\"block env temp\">" + String(env->temperature) + "</div>";
+        dev_html += "<div class=\"block env humidity\">" + String(env->humidity) + "</div>";
+        dev_html += "<div class=\"block env pressure\">" + String(env->pressure) + "</div>";
+        dev_html += "<div class=\"block env light\">" + String(env->illuminance) + "</div>";
+        break;
+    }
+
     default:{
         dev_html += "<div class=\"block " + String(dev->isOn?"on":"off") + "\">";
         dev_html += "unhandled: " + String(dev->name);
@@ -124,6 +136,7 @@ String WebApi::html_dev(Device* dev){
 // JSON api
 void WebApi::json_send_status(){
     String r_body;
+    bool has_lights = false;
     r_body += "{\"name\":\"" +  String(this->node_name) + "\"," ;
 
     // lights array
@@ -131,22 +144,25 @@ void WebApi::json_send_status(){
     for (int i = 0; i < this->device_count; i++){
         if(!this->device_list[i]->type == Device::DevType_e::Light){
             r_body += "{\"" + String(device_list[i]->name) + "\":\"" + String(device_list[i]->isOn?"1":"0") + "\"},";
+            has_lights = true;
         };
     };
-    r_body = r_body.substring(0, r_body.length()-1);
+    if(has_lights) r_body = r_body.substring(0, r_body.length()-1);
     r_body += "]";
 
     // devices
     for (int i = 0; i < this->device_count; i++){
         if(this->device_list[i]->type==Device::DevType_e::Light) continue;
         switch (device_list[i]->type){
-        
-        case Device::DevType_e::Fan:{ //"fan":{"speed":"4"}
-            r_body += ",\"fan\":{\"speed\":\"" + String(((Fan*)device_list[i])->speed) + "\"}";
-        }
+            
+            case Device::DevType_e::Fan:{ //"fan":{"speed":"4"}
+                r_body += ",\"fan\":{\"speed\":\"" + String(((Fan*)device_list[i])->speed) + "\"}";
+            }
 
+            case Device::DevType_e::Environment:{ //"fan":{"speed":"4"}
+                r_body += ",\"environment\":{\"temperature\":\""  + String(((Environment*)device_list[i])->temperature) + "\",\"humidity\":\""   + String(((Environment*)device_list[i])->humidity) + "\",\"pressure\":\""  + String(((Environment*)device_list[i])->pressure) + "\", \"illuminance\":\"" + String(((Environment*)device_list[i])->illuminance) + "\"}";
+            };
         };
-
     }
     
 

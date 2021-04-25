@@ -2,7 +2,6 @@
 ////////////////////////
 // MQTT blocks
 
-#define MQTT_CLIENT_ID "suite_controller"
 #define MQTT_SERVER_IP "192.168.1.201"
 #define MQTT_SERVER_PORT 1883
 #define MQTT_USER "darkblue"
@@ -37,6 +36,13 @@ void WebApi::setup_mqtt(){
 
         break;
       }
+      case Device::DevType_e::Environment:{
+        ((Environment*)this->device_list[i])->topic = String(ctrl_root + "environment/status");
+        ((Environment*)this->device_list[i])->topic_temperature = String(ctrl_root + "environment/temperature");
+        ((Environment*)this->device_list[i])->topic_pressure = String(ctrl_root + "environment/pressure");
+        ((Environment*)this->device_list[i])->topic_humidity = String(ctrl_root + "environment/humidity");
+        ((Environment*)this->device_list[i])->topic_illuminance = String(ctrl_root + "environment/illuminance");
+      }
     
       default:{
           this->device_list[i]->topic = String(ctrl_root + this->device_list[i]->name).c_str();
@@ -54,50 +60,51 @@ void WebApi::mqtt_connect() {
   if (this->mqtt->connected()) return;
   if (this->mqtt_retry_time > millis()) return;
 
-  Serial.print("mqtt | connecting... ");
+  String client_id = String(this->node_name + "_controller").c_str();
+  Serial.print("mqtt | connecting as ");
+  Serial.print(client_id);
+  Serial.print("... ");
+  
+  if (this->mqtt->connect(client_id.c_str(), MQTT_USER, MQTT_PASSWORD)) {
+    Serial.println("ok!");
 
-    //const char* client_id = String(this->node_name + "_controller").c_str();
+    for (int i = 0; i < this->device_count; i++) {
+      switch (this->device_list[i]->type){
 
-    if (this->mqtt->connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD)) {
-      Serial.println("ok!");
+        case Device::DevType_e::Light:{
+            if(this->device_list[i]->isVirtual){
 
-      for (int i = 0; i < this->device_count; i++) {
-        switch (this->device_list[i]->type){
+              // virtual device only listen to state updates
+              this->mqtt_subscribe(String(this->device_list[i]->topic).c_str());
+            }else{
 
-          case Device::DevType_e::Light:{
-              if(this->device_list[i]->isVirtual){
+              // actual device listen to setter topic and publish updates
+              this->mqtt_subscribe(String(this->device_list[i]->topic + "/set").c_str());
+              this->mqtt_publish(this->device_list[i]);
+            };
+          break;
+        }
 
-                // virtual device only listen to state updates
-                this->mqtt_subscribe(String(this->device_list[i]->topic).c_str());
-              }else{
-
-                // actual device listen to setter topic and publish updates
-                this->mqtt_subscribe(String(this->device_list[i]->topic + "/set").c_str());
-                this->mqtt_publish(this->device_list[i]);
-              };
-            break;
-          }
-
-          case Device::DevType_e::Fan:{
-            Fan* fan = (Fan*)this->device_list[i];
-            this->mqtt_subscribe(String(fan->topic_status + "/set").c_str());
-            this->mqtt_subscribe(String(fan->topic_speed + "/set").c_str());
-            this->mqtt_subscribe(String(fan->topic_mode + "/set").c_str());
-            this->mqtt_publish(fan);
-            break;
-          }
-
-        };
-        
+        case Device::DevType_e::Fan:{
+          Fan* fan = (Fan*)this->device_list[i];
+          this->mqtt_subscribe(String(fan->topic_status + "/set").c_str());
+          this->mqtt_subscribe(String(fan->topic_speed + "/set").c_str());
+          this->mqtt_subscribe(String(fan->topic_mode + "/set").c_str());
+          this->mqtt_publish(fan);
+          break;
+        }
 
       };
+      
 
-    } else {
-      Serial.print("FAILED!! state:");
-      Serial.println(this->mqtt->state());
+    };
 
-      this->mqtt_retry_time = millis() + 5000; //wait 5s to reconnect
-    }
+  } else {
+    Serial.print("FAILED!! state:");
+    Serial.println(this->mqtt->state());
+
+    this->mqtt_retry_time = millis() + 5000; //wait 5s to reconnect
+  }
 };
 
 void WebApi::mqtt_subscribe(const char* topic){
@@ -168,12 +175,13 @@ void WebApi::mqtt_publish(Device* dev){
   const char* msg = dev->isOn?"ON":"OFF";
 
   switch (dev->type){
+    case Device::DevType_e::Light:{
+      this->mqtt_publish(dev->topic.c_str(), dev->isOn?"ON":"OFF");
+      break;
+    }
 
     default:
-      const char* topic = dev->topic.c_str();
-      const char* msg = dev->isOn?"ON":"OFF";
-
-      this->mqtt_publish(dev->topic.c_str(), dev->isOn?"ON":"OFF");
+      //
       break;
 
   };
@@ -215,4 +223,13 @@ void WebApi::mqtt_handle_callback(Fan* fan, String cmd, String payload){
   Serial.print(cmd);
   Serial.print(" > ");
   Serial.println(payload);
+}
+
+// environment
+void WebApi::mqtt_publish(Environment* env){
+  this->mqtt_publish(env->topic.c_str(), env->isOn?"ON":"OFF");
+  this->mqtt_publish(env->topic_temperature.c_str(), String(env->temperature).c_str());
+  this->mqtt_publish(env->topic_humidity.c_str(),    String(env->humidity).c_str());
+  this->mqtt_publish(env->topic_pressure.c_str(),    String(env->pressure).c_str());
+  this->mqtt_publish(env->topic_illuminance.c_str(), String(env->illuminance).c_str());
 }

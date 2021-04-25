@@ -31,30 +31,32 @@ Device* devices[] = {&light, &environment};
 void setup() {
   pinMode(statusLedPin, OUTPUT);
   digitalWrite(statusLedPin, LOW);
+  light.turnOn();
+
+  wemosWiFi.connect(NODE_NAME);
 
   //core devices
   wallSwitch.setup();
   wallSwitch.swCallback=[](int cc) {light.toggle();};
-  light.turnOn();
 
   //connect
-  wemosWiFi.connect(NODE_NAME);
   api.set_devices(devices, 2);
   api.setup();
   light.statusChanged=[](String topic, bool state){api.mqtt_publish(&light);};
 
   //non-critical hardware
-  light.turnOff();
   environment.setup();
+  environment.statusUpdated = [](bool state){api.mqtt_publish(&environment);};
+
+  light.turnOff();
   digitalWrite(statusLedPin, HIGH);
 
 };
  
 void loop() {
-  wallSwitch.update();
-  environment.update();
-
   wemosWiFi.update();
   api.update();
 
+  wallSwitch.update();
+  environment.update();
 };
