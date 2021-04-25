@@ -18,7 +18,6 @@ public:
 
     // mqtt
     String topic;
-    String topic_listen;
     
     // virtual device (ie mqtt)
     bool isVirtual;

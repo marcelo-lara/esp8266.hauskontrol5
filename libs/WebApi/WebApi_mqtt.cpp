@@ -21,19 +21,36 @@ void WebApi::setup_mqtt(){
 
   for (int i = 0; i < this->device_count; i++) {
     switch (this->device_list[i]->type){
-      case Device::DevType_e::Light:
+
+      case Device::DevType_e::Light:{
         this->device_list[i]->topic = String(ctrl_root + "light/" + this->device_list[i]->name).c_str();
-        this->device_list[i]->topic_listen = String(ctrl_root + "light/" + this->device_list[i]->name + "/set").c_str();
         break;
+      }
+
+      case Device::DevType_e::Fan:{
+        ((Fan*)this->device_list[i])->topic = String(ctrl_root + "fan");
+        ((Fan*)this->device_list[i])->topic_status = String(ctrl_root + "fan/status");
+        ((Fan*)this->device_list[i])->topic_speed  = String(ctrl_root + "fan/speed");
+        ((Fan*)this->device_list[i])->topic_mode   = String(ctrl_root + "fan/mode");
+
+        ((Fan*)this->device_list[i])->topic_status_set = String(ctrl_root + "fan/status/set");
+        ((Fan*)this->device_list[i])->topic_speed_set = String(ctrl_root + "fan/speed/set");
+        ((Fan*)this->device_list[i])->topic_mode_set  = String(ctrl_root + "fan/mode/set");
+
+        break;
+      }
     
-    default:
-        this->device_list[i]->topic = String(ctrl_root + this->device_list[i]->name).c_str();
-        break;
-    }
+      default:{
+          this->device_list[i]->topic = String(ctrl_root + this->device_list[i]->name).c_str();
+          break;
+      }
+
+    };
   };
   
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WebApi::mqtt_connect() {
   
   if (this->mqtt->connected()) return;
@@ -47,17 +64,33 @@ void WebApi::mqtt_connect() {
       Serial.println("ok!");
 
       for (int i = 0; i < this->device_count; i++) {
-        
-        if(this->device_list[i]->isVirtual){
+        switch (this->device_list[i]->type){
 
-          // virtual device listen to state updates
-          this->mqtt->subscribe(String(this->device_list[i]->topic).c_str());
-        }else{
+          case Device::DevType_e::Light:{
+              if(this->device_list[i]->isVirtual){
 
-          // actual device listen to setter topic and publish updates
-          this->mqtt->subscribe(String(this->device_list[i]->topic + "/set").c_str());
-          this->mqtt_publish(this->device_list[i]);
+                // virtual device only listen to state updates
+                this->mqtt_subscribe(String(this->device_list[i]->topic).c_str());
+              }else{
+
+                // actual device listen to setter topic and publish updates
+                this->mqtt_subscribe(String(this->device_list[i]->topic + "/set").c_str());
+                this->mqtt_publish(this->device_list[i]);
+              };
+            break;
+          }
+
+          case Device::DevType_e::Fan:{
+            Fan* fan = (Fan*)this->device_list[i];
+            this->mqtt_subscribe(fan->topic_status_set.c_str());
+            this->mqtt_subscribe(fan->topic_speed_set.c_str());
+            this->mqtt_subscribe(fan->topic_mode_set.c_str());
+            this->mqtt_publish(fan);
+            break;
+          }
+
         };
+        
 
       };
 
@@ -70,13 +103,56 @@ void WebApi::mqtt_connect() {
 };
 
 void WebApi::mqtt_subscribe(const char* topic){
+  Serial.print("mqtt subscribe| ");
+  Serial.println(topic);
+
   this->mqtt->subscribe(topic);
 };
 
+// Callback commands
+
+void WebApi::mqtt_callback(char* topic, byte* p_payload, unsigned int length) {
+  
+  // get payload
+  String payload;
+  for (uint8_t i = 0; i < length; i++) {payload.concat((char)p_payload[i]);};
+
+  //debug
+  Serial.print("mqtt callback| ");
+  Serial.print(topic);
+  Serial.print(": ");
+  Serial.println(payload);
+
+  // run commands
+  for (int i = 0; i < this->device_count; i++) {
+    
+    //strncmp
+    // if (!this->device_list[i]->topic_listen.equals(topic)) continue;
+    // switch (this->device_list[i]->type){
+
+    //   case Device::DevType_e::Light:{
+    //     if (payload.equals(String("ON"))){ this->device_list[i]->turnOn(); };
+    //     if (payload.equals(String("OFF"))){ this->device_list[i]->turnOff(); };
+    //     this->mqtt_publish(this->device_list[i]);
+    //     break;
+    //   }
+
+    // };
+  };
+
+  // trigger callback
+  if(this->mqttTopicReceivedCb != nullptr) this->mqttTopicReceivedCb(topic, payload);
+
+};
+
 void WebApi::mqtt_publish(const char* _topic, const char* _message){
-  Serial.printf("mqtt publish | %s: %s", _topic, _message);
+  Serial.printf("mqtt publish | %s: %s\n", _topic, _message);
   this->mqtt->publish(_topic, _message, true);
 };
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// update device
 
 void WebApi::mqtt_publish(Device* dev){
   const char* topic = dev->topic.c_str();
@@ -92,46 +168,20 @@ void WebApi::mqtt_publish(Device* dev){
       const char* topic = dev->topic.c_str();
       const char* msg = dev->isOn?"ON":"OFF";
 
-      this->mqtt->publish(dev->topic.c_str(), dev->isOn?"ON":"OFF", true);
+      this->mqtt_publish(dev->topic.c_str(), dev->isOn?"ON":"OFF");
       break;
 
   };
 
 };
-
-void WebApi::mqtt_publish(Fan* fan){
-      const char* topic = fan->topic.c_str();
-      const char* msg = fan->isOn?"ON":"OFF";
-
-      //char* status = topic + "status";
-
-      Serial.printf("mqtt fan | %s\n", topic);
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Callback commands
+// 
+void WebApi::mqtt_publish(Fan* fan){
 
-void WebApi::mqtt_callback(char* topic, byte* p_payload, unsigned int length) {
-  
-  // get payload
-  String payload;
-  for (uint8_t i = 0; i < length; i++) {payload.concat((char)p_payload[i]);};
 
-  // run commands
-  for (int i = 0; i < this->device_count; i++) {
-    if (!this->device_list[i]->topic_listen.equals(topic)) continue;
-    switch (this->device_list[i]->type){
-
-    case Device::DevType_e::Light:
-      if (payload.equals(String("ON"))){ this->device_list[i]->turnOn(); };
-      if (payload.equals(String("OFF"))){ this->device_list[i]->turnOff(); };
-      this->mqtt_publish(this->device_list[i]);
-      break;
-    
-    };
-  };
-
-  // trigger callback
-  if(this->mqttTopicReceivedCb != nullptr) this->mqttTopicReceivedCb(topic, payload);
-
+  this->mqtt_publish(fan->topic_status.c_str(), fan->isOn?"ON":"OFF");
+  this->mqtt_publish(fan->topic_mode.c_str(), fan->mode.c_str());
+  this->mqtt_publish(fan->topic_speed.c_str(), String(fan->speed).c_str());
 };
+
