@@ -1,10 +1,19 @@
 #include "Fan.h"
 
 Fan::Fan(int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed) : Device(Device::DevType_e::Fan, "fan") {
-    pin1=_pin1; pinMode(pin1, OUTPUT); digitalWrite(pin1, 0);
-    pin2=_pin2; pinMode(pin2, OUTPUT); digitalWrite(pin2, 0);
-    pin3=_pin3; pinMode(pin3, OUTPUT); digitalWrite(pin3, 0);
-    pin4=_pin4; pinMode(pin4, OUTPUT); digitalWrite(pin4, 0);
+    out[0] = _pin1;
+    out[1] = _pin2;
+    out[2] = _pin3;
+    out[3] = _pin4;
+    onSpeed=_defaultSpeed;
+    max_speed=4;
+};
+Fan::Fan(bool _inv_out, int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed) : Device(Device::DevType_e::Fan, "fan") {
+    inv_out = _inv_out;
+    out[0] = _pin1;
+    out[1] = _pin2;
+    out[2] = _pin3;
+    out[3] = _pin4;
     onSpeed=_defaultSpeed;
     max_speed=4;
 };
@@ -51,14 +60,10 @@ void Fan::render(){
 };
 
 void Fan::render_direct(){
-    pinMode(pin1, OUTPUT);pinMode(pin2, OUTPUT);pinMode(pin3, OUTPUT);pinMode(pin4, OUTPUT);
-    switch (speed){
-        case 0: digitalWrite(pin1, 0); digitalWrite(pin2, 0); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
-        case 1: digitalWrite(pin1, 1); digitalWrite(pin2, 0); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
-        case 2: digitalWrite(pin1, 1); digitalWrite(pin2, 1); digitalWrite(pin3, 0); digitalWrite(pin4, 0); break;
-        case 3: digitalWrite(pin1, 1); digitalWrite(pin2, 1); digitalWrite(pin3, 1); digitalWrite(pin4, 0); break;
-        case 4: digitalWrite(pin1, 1); digitalWrite(pin2, 1); digitalWrite(pin3, 1); digitalWrite(pin4, 1); break;
-    };
+    for (int i = 0; i < this->max_speed; i++) {
+        pinMode(this->out[i], OUTPUT);
+        digitalWrite(this->out[i], ((this->speed > i) ? (this->inv_out?0:1) : (this->inv_out?1:0)) );
+    }
 };
 void Fan::render_shifted(){
     for (int i = 0; i < this->max_speed; i++)
