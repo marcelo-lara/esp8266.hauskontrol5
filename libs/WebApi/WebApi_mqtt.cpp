@@ -115,9 +115,9 @@ void WebApi::mqtt_subscribe(const char* topic){
 };
 
 // Callback commands
-std::string tail(std::string const& source, size_t const length) {
-  if (length >= source.size()) { return source; }
-  return source.substr(source.size() - length);
+String tail(String source, size_t const length) {
+  if (length >= source.length()) { return source; }
+  return source.substring(source.length() - length);
 } // tail
 
 void WebApi::mqtt_callback(char* topic, byte* p_payload, unsigned int length) {
