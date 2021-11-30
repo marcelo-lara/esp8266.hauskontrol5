@@ -53,6 +53,8 @@ private:
     //web ui
     void web_send_root();
     String html_dev(Device* dev);
+    String html_button(String classname, String target, String caption);
+    String html_button(String classname, String target, String caption, bool state);
 
     //api
     void json_send_status();

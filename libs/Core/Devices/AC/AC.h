@@ -9,6 +9,41 @@ public:
     
     void init();
 
+    //home-assistant values https://www.home-assistant.io/integrations/climate.mqtt/
+    // String configuration_url;
+    // String identifiers;
+    // String manufacturer;
+    // String model;
+    // String name;
+    // String suggested_area;
+    // String sw_version;
+    int	   max_temp;
+    int	   min_temp;
+    // float  current_temperature;
+    // float  current_humidity;
+    // float  target_temperature;
+    // float  target_temperature_high;
+    // float  target_temperature_low;
+    // float  target_temperature_step;
+    // float  target_humidity;
+    // String	hvac_mode;
+    // String	hvac_action;
+    // //list	hvac_modes;
+    // String	preset_mode;
+    // //list	preset_modes;
+    // String	fan_mode;
+    // //list	fan_modes;
+    // String	swing_mode;
+    // //list	swing_modes;
+
+
+    String temperature_unit;
+    float  precision;
+
+    String fan_mode_command_topic;
+    
+
+
     //base
     void turnOn();
     void turnOff();

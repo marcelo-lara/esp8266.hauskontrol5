@@ -31,6 +31,24 @@ void WebApi::setup_web(){
         }
 
 
+        case Device::DevType_e::AC:{
+            this->server->on(String("/set/ac/on"),     [this, dev]() { dev->turnOn();  return this->send_result("ok"); });
+            this->server->on(String("/set/ac/off"),    [this, dev]() { dev->turnOff(); return this->send_result("ok"); });
+
+            this->server->on(String("/set/ac/swing/on"),     [this, dev]() { ((AC*)dev)->swingOn();  return this->send_result("ok"); });
+            this->server->on(String("/set/ac/swing/off"),    [this, dev]() { ((AC*)dev)->swingOn();  return this->send_result("ok"); });
+
+            this->server->on(String("/set/ac/flow/0"),     [this, dev]() { ((AC*)dev)->setFlow(0);  return this->send_result("ok"); });
+            this->server->on(String("/set/ac/flow/1"),     [this, dev]() { ((AC*)dev)->setFlow(1);  return this->send_result("ok"); });
+            this->server->on(String("/set/ac/flow/2"),     [this, dev]() { ((AC*)dev)->setFlow(2);  return this->send_result("ok"); });
+
+            for (int i = ((AC*)dev)->min_temp; i < ((AC*)dev)->max_temp+1; i++){
+                this->server->on(String("/set/fan/speed/"+ String(i)),    [this, dev, i]() {  ((AC*)dev)->setTemp(i); return this->send_result("ok"); });
+            };
+
+            break;
+        }
+
 
         };
     };
@@ -78,6 +96,20 @@ void WebApi::web_send_root(){
     this->server->send(200, "text/html", r_body);
 };
 
+String WebApi::html_button(String classname, String target, String caption){
+    return  "<div"
+            " class=\"block button " + classname + "\""
+         +  " target=\"" + target  + "\""
+         + ">" + caption + "</div>";
+}
+
+String WebApi::html_button(String classname, String target, String caption, bool state){
+    return  "<div"
+            " class=\"block button " + String(state?"on":"off") + " " + classname + "\""
+         +  " target=\"" + target  + String(state?"off":"on") + "\""
+         + ">" + String(state?"on":"off") + " " + caption + "</div>";
+}
+
 String WebApi::html_dev(Device* dev){
     String dev_html;
     switch (dev->type){
@@ -119,6 +151,16 @@ String WebApi::html_dev(Device* dev){
         dev_html += "<div class=\"block env humidity\">" + String(env->humidity) + "</div>";
         dev_html += "<div class=\"block env pressure\">" + String(env->pressure) + "</div>";
         dev_html += "<div class=\"block env light\">" + String(env->illuminance) + "</div>";
+        break;
+    }
+
+    case Device::DevType_e::AC:{
+        AC* ac = (AC*)dev;
+
+        dev_html += html_button("ac", "set/ac/", "pwr", ac->isOn);
+        dev_html += "<div class=\"block button ac temp\">"   + String(ac->temp) + "</div>";
+        dev_html += "<div class=\"block button ac flow\">flow "   + String(ac->flow) + "</div>";
+        dev_html += "<div class=\"block button ac swing\">swing "  + String(ac->swing) + "</div>";
         break;
     }
 

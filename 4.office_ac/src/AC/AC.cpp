@@ -5,14 +5,14 @@
 #include <IRsend.h>
 IRsend irsend(14);  // An IR LED is controlled by GPIO pin 14 (D5)
 
-const unsigned int kAc_Type = 1; // 1: Wall
-unsigned int        ac_heat = 0; // 0: Cool | 1: Heat
-unsigned int    ac_power_on = 0; // 0: Off  | 1: On
+const unsigned int     kAc_Type = 1; // 1: Wall
+unsigned int            ac_heat = 0; // 0: Cool | 1: Heat
+unsigned int        ac_power_on = 0; // 0: Off  | 1: On
 unsigned int ac_air_clean_state = 0; // 0 : off | 1 : on --> power on
-unsigned int ac_temperature = 23; // 18 ~ 30
-unsigned int ac_flow = 2; // 0: low | 2: high
+unsigned int     ac_temperature = 23; // 18 ~ 30
+unsigned int            ac_flow = 2; // 0: low | 2: high
 const uint8_t kAc_Flow_Tower[3] = {0, 4, 6};
-const uint8_t kAc_Flow_Wall[4] = {0, 2, 4, 5};    
+const uint8_t  kAc_Flow_Wall[4] = {0, 2, 4, 5};    
 
 //private
 void ac_update(unsigned int temperature, unsigned int air_flow);
@@ -22,6 +22,10 @@ AC::AC(int _irOut, int defaultTemp) : Device(Device::DevType_e::AC, "ac"){
     temp  = 23;
     flow  = 0;
     swing = true;
+
+    min_temp = 20;
+    max_temp = 26;
+
 }
 
 void AC::init(){
