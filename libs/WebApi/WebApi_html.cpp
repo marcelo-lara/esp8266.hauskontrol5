@@ -32,27 +32,21 @@ void WebApi::setup_web(){
 
 
         case Device::DevType_e::AC:{
-            this->server->on(String("/set/ac/on"),     [this, dev]() { dev->turnOn();  return this->send_result("ok"); });
-            this->server->on(String("/set/ac/off"),    [this, dev]() { dev->turnOff(); return this->send_result("ok"); });
-
-            this->server->on(String("/set/ac/swing/on"),     [this, dev]() { ((AC*)dev)->swingOn();  return this->send_result("ok"); });
-            this->server->on(String("/set/ac/swing/off"),    [this, dev]() { ((AC*)dev)->swingOn();  return this->send_result("ok"); });
-
-            this->server->on(String("/set/ac/flow/0"),     [this, dev]() { ((AC*)dev)->setFlow(0);  return this->send_result("ok"); });
-            this->server->on(String("/set/ac/flow/1"),     [this, dev]() { ((AC*)dev)->setFlow(1);  return this->send_result("ok"); });
-            this->server->on(String("/set/ac/flow/2"),     [this, dev]() { ((AC*)dev)->setFlow(2);  return this->send_result("ok"); });
-
+            this->server->on(String("/set/ac/on"),        [this, dev]() { dev->turnOn();  return this->send_result("ok"); });
+            this->server->on(String("/set/ac/off"),       [this, dev]() { dev->turnOff(); return this->send_result("ok"); });
+            this->server->on(String("/set/ac/swing/on"),  [this, dev]() { ((AC*)dev)->swingOn();  return this->send_result("ok"); });
+            this->server->on(String("/set/ac/swing/off"), [this, dev]() { ((AC*)dev)->swingOff(); return this->send_result("ok"); });
+            this->server->on(String("/set/ac/flow/0"),    [this, dev]() { ((AC*)dev)->setFlow(0);  return this->send_result("ok"); });
+            this->server->on(String("/set/ac/flow/1"),    [this, dev]() { ((AC*)dev)->setFlow(1);  return this->send_result("ok"); });
+            this->server->on(String("/set/ac/flow/2"),    [this, dev]() { ((AC*)dev)->setFlow(2);  return this->send_result("ok"); });
             for (int i = ((AC*)dev)->min_temp; i < ((AC*)dev)->max_temp+1; i++){
-                this->server->on(String("/set/fan/speed/"+ String(i)),    [this, dev, i]() {  ((AC*)dev)->setTemp(i); return this->send_result("ok"); });
+                this->server->on(String("/set/ac/temp/"+ String(i)),    [this, dev, i]() {  ((AC*)dev)->setTemp(i); return this->send_result("ok"); });
             };
 
             break;
         }
-
-
         };
     };
-
 
     //set CORS options
     this->server->onNotFound([&](){
@@ -69,27 +63,30 @@ void WebApi::setup_web(){
 
     //start server
     this->server->begin();
-
 };
 
 void WebApi::web_send_root(){
     String r_body;
     r_body += "<html>";
     r_body += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta http-equiv=\"refresh\" content=\"60\"/><style>";
-    r_body += "html,body,h2{background-color:#000;color:#eee;font-family:sans-serif;margin:0;padding:0}";
-    r_body += "section,h1,h2{padding:15px}";
-    r_body += "div.block{width:8em;height:8em;display:inline-grid;padding:1em;background-color:#222;margin:.25em;cursor:pointer}";
-    r_body += "h1{background-color:#111;color:#ccc}";
-    r_body += "div.button.on{background-color:#282}";
-    r_body += "h3{writing-mode: vertical-rl;display: inline-block;width: 1em; height: 8em;transform: rotate(180deg);}";
-    r_body += ".fb{display: flex;}";
-    r_body += ".fb>div{flex: 0 0 auto;}";
+    //minified CSS
+    r_body += "html,body,h2{background-color:#000;color:#eee;font-family:sans-serif;margin:0;padding:0}section,h1{padding:15px}h1{padding:15px}h2{transform:rotate(270deg);display:inline-block;width:2em;height:1em}div.block{width:8em;height:8em;display:inline-grid;padding:1em;background-color:#222;margin:.25em;cursor:pointer;position:relative}div>input[type='range']{position:absolute;bottom:.25em;width:100%;height:2em}h1{background-color:#111;color:#ccc}div.on{background-color:#282}h3{writing-mode:vertical-rl;display:inline-block;width:1em;height:8em;transform:rotate(180deg)}.fb{display:flex}.fb>div{flex:0 0 auto}";
+
     r_body += "</style></head><body>";
     r_body += "<h1>" + String(this->node_name) + "</h1><section>";
 
     //devices
     for (int i = 0; i < this->device_count; i++){r_body += String(this->html_dev(this->device_list[i]));};
-    r_body += "</section><script>for(b of document.querySelectorAll(\"div.button\")){let t=b.getAttribute(\"target\");b.addEventListener(\"click\", ()=>{fetch(t).then(()=>{document.location.reload(true)})})}</script>";
+    r_body += "</section>";
+
+    // JS
+    r_body += "<script>";
+    r_body += "api=t=>fetch(t).then(()=>{document.location.reload(true)});";
+    r_body += "for(b of document.querySelectorAll(\"input[target]\"))b.addEventListener(\"change\",e=>api(`${e.target.getAttribute(\"target\")}/${e.target.value}`));";
+    r_body += "for(b of document.querySelectorAll(\"div.button[target]\"))b.addEventListener(\"click\",e=>api(e.target.getAttribute(\"target\")));";
+    r_body += "</script>";
+
+
     r_body += ("</body></html>");
     
     //send
@@ -107,7 +104,7 @@ String WebApi::html_button(String classname, String target, String caption, bool
     return  "<div"
             " class=\"block button " + String(state?"on":"off") + " " + classname + "\""
          +  " target=\"" + target  + String(state?"off":"on") + "\""
-         + ">" + String(state?"on":"off") + " " + caption + "</div>";
+         + ">" + caption + " " + String(state?"on":"off") + "</div>";
 }
 
 String WebApi::html_dev(Device* dev){
@@ -146,21 +143,37 @@ String WebApi::html_dev(Device* dev){
 
     case Device::DevType_e::Environment:{
         Environment* env = (Environment*)dev;
-
-        dev_html += "<div class=\"block env temp\">" + String(env->temperature) + "</div>";
-        dev_html += "<div class=\"block env humidity\">" + String(env->humidity) + "</div>";
-        dev_html += "<div class=\"block env pressure\">" + String(env->pressure) + "</div>";
-        dev_html += "<div class=\"block env light\">" + String(env->illuminance) + "</div>";
+        dev_html += "<section><h2>Env</h2>";
+        dev_html += "<div class=\"block env temp\">temp "         + String(env->temperature) + "</div>";
+        dev_html += "<div class=\"block env humidity\">humidity " + String(env->humidity) + "</div>";
+        dev_html += "<div class=\"block env pressure\">pressure " + String(env->pressure) + "</div>";
+        dev_html += "<div class=\"block env light\">light "       + String(env->illuminance) + "</div>";
+        dev_html += "</section>";
         break;
     }
 
     case Device::DevType_e::AC:{
         AC* ac = (AC*)dev;
+        dev_html += "<section><h2>AC</h2>";
 
+        //power
         dev_html += html_button("ac", "set/ac/", "pwr", ac->isOn);
-        dev_html += "<div class=\"block button ac temp\">"   + String(ac->temp) + "</div>";
-        dev_html += "<div class=\"block button ac flow\">flow "   + String(ac->flow) + "</div>";
-        dev_html += "<div class=\"block button ac swing\">swing "  + String(ac->swing) + "</div>";
+        
+        //temp
+        dev_html += "<div class=\"block ac temp\">temp: <span>"  + String(ac->temp) + "</span>";
+        dev_html +=   "<input type=\"range\" min=\"" + String(ac->min_temp) + "\" max=\"" + String(ac->max_temp) + "\" step=\"1\" value=\"" + String(ac->temp) + "\" target=\"set/ac/temp\">";
+        dev_html += "</div>";
+
+        //flow
+        dev_html += "<div class=\"block ac flow\">flow: <span>" + String(ac->flow) + "</span>";
+        dev_html +=   "<input type=\"range\" min=\"0\" max=\"2\" step=\"1\" value=\"" + String(ac->flow) + "\" target=\"set/ac/flow\">";
+        //dev_html +=   "<input type=\"range\" min=\"" + String(ac->min_flow) + " \" max=\"" + String(ac->max_flow) + "\" step=\"1\" value=\"" + String(ac->temp) + "\" target=\"set/temp\">";
+        dev_html += "</div>";
+
+        //swing
+        dev_html += html_button("swing", "set/ac/swing/", "swing", ac->swing);
+        dev_html += "</section>";
+
         break;
     }
 
@@ -206,8 +219,7 @@ void WebApi::json_send_status(){
             };
         };
     }
-    
-
+  
     r_body += "}";
 
     // send json
