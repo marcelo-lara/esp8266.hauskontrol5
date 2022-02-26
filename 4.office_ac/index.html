@@ -1,0 +1,38 @@
+<!-- saved from url=(0021)http://192.168.1.121/ -->
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        
+    </style>
+</head>
+
+<body>
+    <h1>officeac</h1>
+    <section>
+        <h2>AC</h2>
+        <div class="block button off ac" target="set/ac/on">on pwr</div>
+        <div class="block ac temp">
+            <span class="val">23</span>
+            <input type="range" min="18" max="25" step="1" value="21" target="set/temp">
+        </div>
+        <div class="block button ac flow">flow 0</div>
+        <div class="block button ac swing">swing 1</div>
+    </section>
+    <section>
+        <h2>Env</h2>
+        <div class="block env temp">0.00</div>
+        <div class="block env humidity">0.00</div>
+        <div class="block env pressure">0.00</div>
+        <div class="block env light">0.00</div>
+    </section>
+    <script>
+api=t=>fetch(t).then(()=>{document.location.reload(true)});
+for(b of document.querySelectorAll("input[target]"))b.addEventListener("change",e=>api(`${e.target.getAttribute("target")}/${e.target.value}`));
+for(b of document.querySelectorAll("div.button[target]"))b.addEventListener("click",e=>api(e.target.getAttribute("target")));
+    </script>
+</body>
+
+</html>
