@@ -31,20 +31,20 @@ void WebApi::setup_web(){
         }
 
 
-        case Device::DevType_e::AC:{
-            this->server->on(String("/set/ac/on"),        [this, dev]() { dev->turnOn();  return this->send_result("ok"); });
-            this->server->on(String("/set/ac/off"),       [this, dev]() { dev->turnOff(); return this->send_result("ok"); });
-            this->server->on(String("/set/ac/swing/on"),  [this, dev]() { ((AC*)dev)->swingOn();  return this->send_result("ok"); });
-            this->server->on(String("/set/ac/swing/off"), [this, dev]() { ((AC*)dev)->swingOff(); return this->send_result("ok"); });
-            this->server->on(String("/set/ac/flow/0"),    [this, dev]() { ((AC*)dev)->setFlow(0);  return this->send_result("ok"); });
-            this->server->on(String("/set/ac/flow/1"),    [this, dev]() { ((AC*)dev)->setFlow(1);  return this->send_result("ok"); });
-            this->server->on(String("/set/ac/flow/2"),    [this, dev]() { ((AC*)dev)->setFlow(2);  return this->send_result("ok"); });
-            for (int i = ((AC*)dev)->min_temp; i < ((AC*)dev)->max_temp+1; i++){
-                this->server->on(String("/set/ac/temp/"+ String(i)),    [this, dev, i]() {  ((AC*)dev)->setTemp(i); return this->send_result("ok"); });
-            };
+        // case Device::DevType_e::AC:{
+        //     this->server->on(String("/set/ac/on"),        [this, dev]() { dev->turnOn();  return this->send_result("ok"); });
+        //     this->server->on(String("/set/ac/off"),       [this, dev]() { dev->turnOff(); return this->send_result("ok"); });
+        //     this->server->on(String("/set/ac/swing/on"),  [this, dev]() { ((AC*)dev)->swingOn();  return this->send_result("ok"); });
+        //     this->server->on(String("/set/ac/swing/off"), [this, dev]() { ((AC*)dev)->swingOff(); return this->send_result("ok"); });
+        //     this->server->on(String("/set/ac/flow/0"),    [this, dev]() { ((AC*)dev)->setFlow(0);  return this->send_result("ok"); });
+        //     this->server->on(String("/set/ac/flow/1"),    [this, dev]() { ((AC*)dev)->setFlow(1);  return this->send_result("ok"); });
+        //     this->server->on(String("/set/ac/flow/2"),    [this, dev]() { ((AC*)dev)->setFlow(2);  return this->send_result("ok"); });
+        //     for (int i = ((AC*)dev)->min_temp; i < ((AC*)dev)->max_temp+1; i++){
+        //         this->server->on(String("/set/ac/temp/"+ String(i)),    [this, dev, i]() {  ((AC*)dev)->setTemp(i); return this->send_result("ok"); });
+        //     };
 
-            break;
-        }
+        //     break;
+        // }
         };
     };
 
@@ -171,7 +171,7 @@ String WebApi::html_dev(Device* dev){
         dev_html += "</div>";
 
         //swing
-        dev_html += html_button("swing", "set/ac/swing/", "swing", ac->swing);
+        // dev_html += html_button("swing", "set/ac/swing/", "swing", ac->swing);
         dev_html += "</section>";
 
         break;
