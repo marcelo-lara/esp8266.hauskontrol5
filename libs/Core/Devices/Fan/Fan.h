@@ -8,7 +8,7 @@ typedef void FanStatusChanged(int outSpeed);
 class Fan : public Device {
 public:
     Fan(int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed);
-    Fan(bool _inv_out, int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed);
+    Fan(bool _single, int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed);
     Fan(ShiftedIo *_shiftedOut, int defaultSpeed);
     void turnOn();
     void turnOff();
@@ -34,12 +34,14 @@ private:
 
     //direct out
     bool inv_out;
+    bool single;
     int out[4];
     int pin1;
     int pin2;
     int pin3;
     int pin4;
     void render_direct();
+    void render_single();
 
     //shifted out
     bool isShiftedOut;

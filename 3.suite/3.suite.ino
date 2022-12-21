@@ -30,7 +30,7 @@ Light light(lightOut, true); // main
 void handleLight(String *args);
 
 #include "src/Core/Devices/Fan/Fan.h"
-Fan fan(fanOut1, fanOut2, fanOut3, fanOut4, defSpeed); // suite fan
+Fan fan(true, fanOut1, fanOut2, fanOut3, fanOut4, defSpeed); // suite fan
 
 Device* devices[] = {&light, &fan};
 
