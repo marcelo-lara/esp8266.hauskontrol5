@@ -1,4 +1,4 @@
-#include "../Core/Devices/AC/AC.h"
+#include "AC.h"
 
 // git@github.com:crankyoldgit/IRremoteESP8266.git
 #include <IRremoteESP8266.h>
@@ -23,7 +23,7 @@ AC::AC(int _irOut, int defaultTemp) : Device(Device::DevType_e::AC, "ac"){
     flow  = 0;
     swing = true;
 
-    min_temp = 20;
+    min_temp = 18;
     max_temp = 26;
 
 }

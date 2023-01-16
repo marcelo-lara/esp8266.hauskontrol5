@@ -6,6 +6,7 @@ typedef void ACStatusChanged(bool isOn);
 class AC : public Device {
 public:
     AC(int _irOut, int defaultTemp);
+    AC() : Device(Device::DevType_e::AC, "AC"){};
     
     void init();
 
@@ -40,9 +41,12 @@ public:
     String temperature_unit;
     float  precision;
 
+    String power_command_topic;
+    String mode_command_topic;
+    String temperature_command_topic;
     String fan_mode_command_topic;
-    
-
+    String swing_mode_command_topic;
+    String current_temperature_topic;
 
     //base
     void turnOn();
