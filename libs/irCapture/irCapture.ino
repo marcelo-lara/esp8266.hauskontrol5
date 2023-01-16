@@ -40,14 +40,14 @@
 // An IR detector/demodulator is connected to GPIO pin 14
 // e.g. D5 on a NodeMCU board.
 // Note: GPIO 16 won't work on the ESP8266 as it does not have interrupts.
-const uint16_t kRecvPin = 14;
+const uint16_t kRecvPin = 13;
 
 // The Serial connection baud rate.
 // i.e. Status message will be sent to the PC at this baud rate.
 // Try to avoid slow speeds like 9600, as you will miss messages and
 // cause other problems. 115200 (or faster) is recommended.
 // NOTE: Make sure you set your Serial Monitor to the same speed.
-const uint32_t kBaudRate = 115200;
+const uint32_t kBaudRate = 250000;
 
 // As this program is a special purpose capture/decoder, let us use a larger
 // than normal buffer so we can handle Air Conditioner remote codes.

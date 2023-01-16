@@ -5,12 +5,15 @@
 /////////////////////////////////////////
 // Hardware Setup
 #define irSendPin      14 // D5 infrared signal out
-#define bme280_scl      5 // D1 SCL (bme280)
-#define bme280_sda      4 // D2 SDA (bme280)
+#define irRecvPin      13 // D7 infrared signal out
+
 #define wifiLedPin      2 // D4 builtIn led
 
-#define acOnSwitchPin  12 // D6 pullup 
-#define acOnLedPin     13 // D7
+#define bme280_scl      5 // D1 SCL (bme280)
+#define bme280_sda      4 // D2 SDA (bme280)
+
+#define acOnSwitchPin  15 // D8 pullup 
+#define acOnLedPin     12 // D6
 ///////////////////////////////////////////
 
 #define NODE_NAME "officeac"
@@ -33,8 +36,8 @@ void setup() {
   wemosWiFi.connect(NODE_NAME);
 
   //non-critical hardware
-  environment.setup();
-  environment.statusUpdated = [](bool state){api.mqtt_publish(&environment);};
+  // environment.setup();
+  // environment.statusUpdated = [](bool state){api.mqtt_publish(&environment);};
 
   //web ui
   api.set_devices(devices, 2);
@@ -48,6 +51,6 @@ void loop() {
   wemosWiFi.update();
   api.update();
 
-  environment.update();
+  // environment.update();
 
 }
