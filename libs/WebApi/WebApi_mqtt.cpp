@@ -26,16 +26,19 @@ void WebApi::setup_mqtt(){
         break;
       }
 
+      case Device::DevType_e::AC:{
+        ((AC*)this->device_list[i])->topic = String(ctrl_root + "ac");
+        break;
+      }
+
       case Device::DevType_e::Fan:{
-        
-        // set topics
         ((Fan*)this->device_list[i])->topic = String(ctrl_root + "fan");
         ((Fan*)this->device_list[i])->topic_status = String(ctrl_root + "fan/status");
         ((Fan*)this->device_list[i])->topic_speed  = String(ctrl_root + "fan/speed");
         ((Fan*)this->device_list[i])->topic_mode   = String(ctrl_root + "fan/mode");
-
         break;
       }
+
       case Device::DevType_e::Environment:{
         ((Environment*)this->device_list[i])->topic = String(ctrl_root + "environment/status");
         ((Environment*)this->device_list[i])->topic_temperature = String(ctrl_root + "environment/temperature");
