@@ -12,3 +12,6 @@
 | ..  ac        |  device block     |
 | ...   temp    |  device property  |
 | ...   fan     |  device property  |
+
+
+## ESP8266
