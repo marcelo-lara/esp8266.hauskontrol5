@@ -28,6 +28,13 @@ void WebApi::setup_mqtt(){
 
       case Device::DevType_e::AC:{
         ((AC*)this->device_list[i])->topic = String(ctrl_root + "ac");
+        ((AC*)this->device_list[i])->power_command_topic = String(ctrl_root + "ac/power");
+        ((AC*)this->device_list[i])->mode_command_topic = String(ctrl_root + "ac/mode");
+        ((AC*)this->device_list[i])->temperature_command_topic = String(ctrl_root + "ac/temperature");
+        ((AC*)this->device_list[i])->fan_mode_command_topic = String(ctrl_root + "ac/fan");
+        ((AC*)this->device_list[i])->swing_mode_command_topic = String(ctrl_root + "ac/swing");
+        ((AC*)this->device_list[i])->current_temperature_topic = String(ctrl_root + "ac/temperature/room");
+        ((AC*)this->device_list[i])->preset_command_topic = String(ctrl_root + "ac/preset");
         break;
       }
 
@@ -97,6 +104,18 @@ void WebApi::mqtt_connect() {
           break;
         }
 
+
+        case Device::DevType_e::AC:{
+          AC* ac = (AC*)this->device_list[i];
+          this->mqtt_subscribe(String(ac->power_command_topic + "/set").c_str());
+          this->mqtt_subscribe(String(ac->fan_mode_command_topic + "/set").c_str());
+          this->mqtt_subscribe(String(ac->swing_mode_command_topic + "/set").c_str());
+          this->mqtt_subscribe(String(ac->temperature_command_topic + "/set").c_str());
+          this->mqtt_subscribe(String(ac->preset_command_topic + "/set").c_str());
+          this->mqtt_publish(ac);
+          break;
+        }
+
       };
       
 
@@ -153,6 +172,10 @@ void WebApi::mqtt_callback(char* topic, byte* p_payload, unsigned int length) {
       }
       case Device::DevType_e::Fan:{
         this->mqtt_handle_callback((Fan*)this->device_list[i], cmd, payload);
+        break;
+      }
+      case Device::DevType_e::AC:{
+        this->mqtt_handle_callback((AC*)this->device_list[i], cmd, payload);
         break;
       }
 
@@ -235,4 +258,54 @@ void WebApi::mqtt_publish(Environment* env){
   this->mqtt_publish(env->topic_humidity.c_str(),    String(env->humidity).c_str());
   this->mqtt_publish(env->topic_pressure.c_str(),    String(env->pressure).c_str());
   this->mqtt_publish(env->topic_illuminance.c_str(), String(env->illuminance).c_str());
+}
+
+// AC
+void WebApi::mqtt_publish(AC* ac){
+  this->mqtt_publish(ac->topic.c_str(), ac->isOn?"ON":"OFF");
+  this->mqtt_publish(ac->power_command_topic.c_str(),       ac->isOn?"ON":"OFF");
+  this->mqtt_publish(ac->mode_command_topic.c_str(),        ac->isOn?"ON":"OFF");
+  this->mqtt_publish(ac->preset_command_topic.c_str(),      String(ac->preset).c_str());
+  this->mqtt_publish(ac->temperature_command_topic.c_str(), String(ac->temp).c_str());
+  this->mqtt_publish(ac->fan_mode_command_topic.c_str(),    ac->flow?"ON":"OFF");
+  this->mqtt_publish(ac->swing_mode_command_topic.c_str(),  ac->swing?"ON":"OFF");
+  this->mqtt_publish(ac->current_temperature_topic.c_str(), String(ac->temp).c_str());
+}
+
+void WebApi::mqtt_handle_callback(AC* ac, String cmd, String payload){
+  
+  // power
+  if(cmd == "/power/set"){
+    if (payload == "ON") ac->turnOn();
+    if (payload == "OFF") ac->turnOff();
+    return;
+  };
+
+  // temperature
+  if(cmd == "/temperature/set"){
+    if (payload == "18.0") ac->setTemp(18);
+    if (payload == "19.0") ac->setTemp(19);
+    if (payload == "20.0") ac->setTemp(20);
+    if (payload == "21.0") ac->setTemp(21);
+    if (payload == "22.0") ac->setTemp(22);
+    if (payload == "23.0") ac->setTemp(23);
+    if (payload == "24.0") ac->setTemp(24);
+    if (payload == "25.0") ac->setTemp(25);
+    if (payload == "26.0") ac->setTemp(26);
+    if (payload == "27.0") ac->setTemp(27);
+    return;
+  };
+
+  if(cmd == "/fan/set"){
+    if (payload == "low") ac->setFlow(0);
+    if (payload == "medium") ac->setFlow(1);
+    if (payload == "high") ac->setFlow(2);
+    return;
+  }
+
+  if(cmd == "/swing/set"){
+    if (payload == "on") ac->swingOn();
+    if (payload == "off") ac->swingOff();
+    return;
+  }
 }

@@ -47,6 +47,7 @@ public:
     String fan_mode_command_topic;
     String swing_mode_command_topic;
     String current_temperature_topic;
+    String preset_command_topic;
 
     //base
     void turnOn();
@@ -66,6 +67,10 @@ public:
     bool swing;
     void swingOn();
     void swingOff();
+
+    //preset(?)
+    String preset;
+    void setPreset(String _preset);
 
     // json
     String to_json(){

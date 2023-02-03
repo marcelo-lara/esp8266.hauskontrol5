@@ -71,6 +71,7 @@ void AC::setTemp(uint _temp)
     if(_temp < 18) _temp = 18;
     if(_temp > 26) _temp = 26;
     this->temp=_temp;
+    this->preset = "eco";
     ac_update(this->temp, this->flow);
 }
 
@@ -81,6 +82,11 @@ void AC::setFlow(uint _flow){
   this->flow=_flow;
   ac_update(this->temp, this->flow);
 }
+
+void AC::setPreset(String _preset){
+  this->preset = _preset;
+}
+
 
 uint32_t ac_code_to_sent;
 
@@ -110,5 +116,8 @@ void ac_update(unsigned int temperature, unsigned int air_flow) {
   ac_code_to_sent = (ac_code_to_sent + ac_msbits7);
 
   irsend.sendLG(ac_code_to_sent, 28);
+
+  Serial.print("ac_code_to_sent:");
+  Serial.println(ac_code_to_sent);
 
 }
