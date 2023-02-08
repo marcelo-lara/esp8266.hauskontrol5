@@ -2,7 +2,7 @@
 ////////////////////////
 // MQTT blocks
 
-#define MQTT_SERVER_IP "192.168.1.201"
+#define MQTT_SERVER_IP "192.168.1.101"
 #define MQTT_SERVER_PORT 1883
 #define MQTT_USER "darkblue"
 #define MQTT_PASSWORD "mju76yhn"
