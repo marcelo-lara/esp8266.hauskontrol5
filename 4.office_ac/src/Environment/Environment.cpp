@@ -1,15 +1,20 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <BMx280I2C.h>
-#define I2C_ADDRESS 0x76
-BMx280I2C bmx280(I2C_ADDRESS);  // requires git@github.com:marcelo-lara/BMx280MI-1.git
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
+#include <DHT_U.h>
+#define DHTTYPE    DHT11
+#define DHTPIN 2
+
+// #define I2C_ADDRESS 0x76
+// BMx280I2C bmx280(I2C_ADDRESS);  // requires git@github.com:marcelo-lara/BMx280MI-1.git
 
 #include "../Core/Devices/Environment/Environment.h"
 
 bool _measuring = false;
 
 void Environment::setup(){
-    Serial.print("Environment| ");
+    Serial.print("DHT11 Environment| ");
     this->isOn=false;
 
     lastUpdated=0;
@@ -17,6 +22,7 @@ void Environment::setup(){
 
     Serial.println("faked!");
 };
+
 void Environment::update(){
     //sensor not present: ignore measurements
     if(lastUpdated==-1) return;

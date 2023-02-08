@@ -9,8 +9,9 @@
 
 #define wifiLedPin      2 // D4 builtIn led
 
-#define bme280_scl      5 // D1 SCL (bme280)
-#define bme280_sda      4 // D2 SDA (bme280)
+// #define bme280_scl      5 // D1 SCL (bme280)
+// #define bme280_sda     
+#define dhtPin          4 // D2 SDA (bme280)
 
 #define acOnSwitchPin  15 // D8 pullup 
 #define acOnLedPin     12 // D6

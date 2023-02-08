@@ -11,11 +11,10 @@
 #define fanOut2           12 // D6
 #define fanOut3           14 // D5
 #define fanOut4           15 // D8
-#define defSpeed           4 // default speed
+#define defSpeed           3 // default speed
 
 //fan
 #include "src/Core/Devices/Fan/Fan.h"
-#define defSpeed           3 // default speed
 Fan fan(true, fanOut1, fanOut2, fanOut3, fanOut4, defSpeed); // stage3 fan
 
 ///////////////////////////////////////////
