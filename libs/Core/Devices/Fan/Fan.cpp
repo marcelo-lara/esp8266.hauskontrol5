@@ -18,6 +18,17 @@ Fan::Fan(bool _single, int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpee
     max_speed=4;
 };
 
+Fan::Fan(bool _single, int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed, bool _inverted) : Device(Device::DevType_e::Fan, "fan") {
+    single = _single;
+    out[0] = _pin1;
+    out[1] = _pin2;
+    out[2] = _pin3;
+    out[3] = _pin4;
+    onSpeed=_defaultSpeed;
+    this->inv_out=_inverted;
+    max_speed=4;
+};
+
 Fan::Fan(ShiftedIo *_shiftedOut, int _defaultSpeed) : Device(Device::DevType_e::Fan, "fan"){
     this->shiftedOut = _shiftedOut;
     this->isShiftedOut = true;

@@ -9,6 +9,7 @@ class Fan : public Device {
 public:
     Fan(int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed);
     Fan(bool _single, int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed);
+    Fan(bool _single, int _pin1,int _pin2,int _pin3,int _pin4, int _defaultSpeed, bool _inverted);
     Fan(ShiftedIo *_shiftedOut, int defaultSpeed);
     void turnOn();
     void turnOff();
