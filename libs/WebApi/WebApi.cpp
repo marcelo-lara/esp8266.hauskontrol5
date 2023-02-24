@@ -8,6 +8,7 @@ WebApi::WebApi(Controller _controller){
         case OfficeAc: this->node_name="officeac";break;
         case Suite: this->node_name="suite";break;
         case Stage3: this->node_name="stage3";break;
+        case SmartPlug: this->node_name="smartplug";break;
     }
 };
 

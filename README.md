@@ -58,3 +58,57 @@
 |---------------|-------------------|
 |  5 // D1      |  pir1             |
 |  4 // D2      |  pir2             |
+
+
+## Arduino-cli version
+
+install
+```bash
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=~/local/bin sh
+```
+
+set user permissions to use USB
+```bash
+sudo usermod -a -G tty $USER
+sudo addgroup $USER dialout
+```
+
+add arduino-cli to path
+```bash
+...
+```
+
+setup
+```bash
+arduino-cli config init
+
+arduino-cli core update-index --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
+
+
+arduino-cli board listall
+```
+
+install libraries
+```bash
+arduino-cli lib install PubSubClient
+arduino-cli lib install IRremoteESP8266
+arduino-cli lib install BMx280MI
+```
+
+
+build & publish
+```bash
+#compile
+arduino-cli compile --fqbn esp8266:esp8266:d1_mini ./6.smartplug/6.smartplug.ino
+
+#upload
+arduino-cli upload -p /dev/ttyUSB0 --fqbn esp8266:esp8266:d1_mini ./6.smartplug/6.smartplug.ino
+
+# build+upload
+arduino-cli compile --fqbn esp8266:esp8266:d1_mini -p /dev/ttyUSB0 -u --verify  ./6.smartplug/6.smartplug.ino
+```
+
+monitor
+```bash
+arduino-cli monitor -p /dev/ttyUSB0 --config baudrate=250000
+```

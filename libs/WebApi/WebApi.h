@@ -19,7 +19,7 @@ typedef void MqttTopicReceivedCB(String topic, String payload);
 
 class WebApi {
 public:
-    enum Controller {Living, Office, Suite, OfficeAc, Stage3};
+    enum Controller {Living, Office, Suite, OfficeAc, Stage3, SmartPlug};
     Controller controller;
     String node_name;
 
